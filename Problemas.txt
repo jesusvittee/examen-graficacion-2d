@@ -1,0 +1,15 @@
+cuando presione INSTRUCCIONES pausar el juego, pausara la distancia
+Al dañarme aparece la vida, pero no puede ser tomada por que esta continua subiendo y nunca lo alcanzo
+Aparece el puntero y el pez que en total dos peces
+
+Apartado de pixeles
+-- constructor de rocas
+-- constructor de golfish
+-- corazon cambia de color cuando se baja una vida y sube cuando tocan la burbuja
+-- burbuja pixele
+
+game canvas y overlay tiene que tener las mismas medidas y nada dentro debe salir de esos limites marcados
+
+cambiar la imagen del pez a un pez goldfish
+
+cambiar fondo de pantalla
