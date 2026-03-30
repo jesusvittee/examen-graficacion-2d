@@ -37,36 +37,41 @@
   </div>
 
   <!-- SIDE PANEL -->
-  <div id="side-panel">
-    <div class="panel-card">
-      <div class="panel-label">Distancia</div>
-      <div class="panel-value" id="score-display" id="km-display">0.00 km</div>
-    </div>
-    <div class="panel-card">
-      <div class="panel-label">ALGAS</div>
-      <div class="panel-value" id="score-display" id="km-display">0.00</div>
-    </div>
-    <div class="panel-card">
-      <div class="panel-label">REcord Distancia</div>
-      <div class="panel-value hi" id="hiscore-display">0.00 km</div>
-    </div>
-        <div class="panel-card">
-      <div class="panel-label">REcord ALGAS</div>
-      <div class="panel-value hi" id="hiscore-display">0.00 km</div>
-    </div>
-    <div class="panel-card">
-      <div class="panel-label">Vidas</div>
-      <div id="lives-display">
-        <canvas class="life-heart" id="life1" width="22" height="22"></canvas>
-        <canvas class="life-heart" id="life2" width="22" height="22"></canvas>
-        <canvas class="life-heart" id="life3" width="22" height="22"></canvas>
-      </div>
-    </div>
-    <div class="panel-card" style="margin-top:auto;">
-      <div class="panel-label" style="color:#69f0ae; font-size:5px;">Velocidad</div>
-      <div class="panel-value" id="speed-display" style="font-size:9px; color:#69f0ae;">2.0x</div>
+<div id="side-panel">
+  <div class="panel-card">
+    <div class="panel-label">Distancia</div>
+    <div class="panel-value" id="score-display">0.00 km</div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-label">ALGAS</div>
+    <div class="panel-value" id="algae-display">0</div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-label">Record Distancia</div>
+    <div class="panel-value hi" id="hiscore-display">0.00 km</div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-label">Record ALGAS</div>
+    <div class="panel-value hi" id="hialgae-display">0</div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-label">Vidas</div>
+    <div id="lives-display">
+      <canvas class="life-heart" id="life1" width="22" height="22"></canvas>
+      <canvas class="life-heart" id="life2" width="22" height="22"></canvas>
+      <canvas class="life-heart" id="life3" width="22" height="22"></canvas>
     </div>
   </div>
+
+  <div class="panel-card" style="margin-top:auto;">
+    <div class="panel-label" style="color:#69f0ae; font-size:5px;">Velocidad</div>
+    <div class="panel-value" id="speed-display" style="font-size:9px; color:#69f0ae;">2.0x</div>
+  </div>
+</div>
 </main>
 
 <!-- ===== FOOTER ===== -->
@@ -82,22 +87,23 @@
       </div>
       <div class="modal-body">
         <h6>🎮 Objetivo</h6>
-        <p>Controla a Goldfish y sobrevive el mayor tiempo posible esquivando obstáculos y recolectando burbujas para recuperar vidas.</p>
+        <p>Controla a Goldfish y sobrevive el mayor tiempo posible esquivando obstáculos, recolectando algas y recuperando vidas con burbujas.</p>
         <h6>🕹️ Controles</h6>
         <p>
           <span class="key-badge">← →</span> Mover izquierda / derecha<br>
-          <span class="key-badge">A D</span> Alternativa izquierda / derecha<br>
           <span class="key-badge">Mouse</span> Mueve el pez siguiendo el cursor<br>
-          <span class="key-badge">Clic</span> En una burbuja para reventarla
+          <span class="key-badge">Space</span> Abrir / cerrar instrucciones (pausa)
         </p>
         <h6>💎 Obstáculos</h6>
         <p>Rocas 🪨 y troncos 🪵 caen desde arriba. Evítalos o perderás una vida. Máximo 4 de 5 carriles ocupados simultáneamente.</p>
+        <h6>🌿 Algas</h6>
+        <p>Las algas 🌿 caen desde arriba igual que los obstáculos pero son inofensivas. ¡Tócalas con el pez para recolectarlas y sumar puntos al contador de algas! Intenta batir tu récord personal.</p>
         <h6>🫧 Burbujas</h6>
         <p>Aparecen tras perder la 1ª y 2ª vida (una sola vez cada vez). ¡Tócalas con el pez o haz clic sobre ellas para recuperar una vida!</p>
         <h6>⚡ Dificultad</h6>
         <p>La velocidad y frecuencia de obstáculos aumentan progresivamente, aunque puede bajar aleatoriamente en intervalos largos para darte un respiro.</p>
         <h6>💀 Game Over</h6>
-        <p>Al perder las 3 vidas el juego termina. Tu puntuación se compara con el récord.</p>
+        <p>Al perder las 3 vidas el juego termina. Tu distancia recorrida y algas recolectadas se comparan con tus récords.</p>
       </div>
     </div>
   </div>

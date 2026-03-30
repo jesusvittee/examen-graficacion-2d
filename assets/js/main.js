@@ -28,17 +28,15 @@
 
   let algaeCount = 0;
   let hiAlgae = parseInt(localStorage.getItem('goldfish_algae_hi') || '0');
-  let algaes = []; // Array para las algas activas en pantalla
+  let algaes = [];
 
-// Esconder el mouse al entrar al canvas
-canvas.addEventListener('mouseenter', () => {
-  canvas.style.cursor = 'none';
-});
-
-// (Opcional) Si quieres que vuelva a aparecer al salir del juego
-canvas.addEventListener('mouseleave', () => {
-  canvas.style.cursor = 'default';
-});
+  // Esconder el mouse al entrar al canvas
+  canvas.addEventListener('mouseenter', () => {
+    canvas.style.cursor = 'none';
+  });
+  canvas.addEventListener('mouseleave', () => {
+    canvas.style.cursor = 'default';
+  });
 
   // ---- SIZES ----
   function resize() {
@@ -81,7 +79,7 @@ canvas.addEventListener('mouseleave', () => {
   let gameState = 'start';
   let score = 0;
   let lives = 3;
-  let speedMul = 1.0;
+  let speedMul = 2.0;
   let lastTimestamp = 0;
   let bgOffset = 0;
   let invulnTimer = 0;
@@ -113,221 +111,144 @@ canvas.addEventListener('mouseleave', () => {
   }
 
   // Goldfish pixel-art sprite
- function drawTurtleSprite(c, w, h, flip = false) {
-  c.save();
-
-  // Ajuste para orientación vertical (Mantenido igual)
-  c.translate(w / 2, h / 2);
-  c.rotate(-Math.PI / 2);
-  c.translate(-h / 2, -w / 2);
-
-  if (flip) {
-    c.scale(-1, 1);
-    c.translate(-h, 0);
+  function drawTurtleSprite(c, w, h, flip = false) {
+    c.save();
+    c.translate(w / 2, h / 2);
+    c.rotate(-Math.PI / 2);
+    c.translate(-h / 2, -w / 2);
+    if (flip) {
+      c.scale(-1, 1);
+      c.translate(-h, 0);
+    }
+    c.imageSmoothingEnabled = false;
+    const pw = h / 16;
+    const ph = w / 20;
+    function px(col, row, color, cols = 1, rows = 1) {
+      c.fillStyle = color;
+      c.fillRect(
+        Math.round(col * pw),
+        Math.round(row * ph),
+        Math.ceil(cols * pw),
+        Math.ceil(rows * ph)
+      );
+    }
+    const shellBlue = '#1c71d8';
+    const shellDark = '#0a4da4';
+    const shellLight = '#3cc7f3';
+    const skinBrown = '#9a6b33';
+    const skinGold = '#c4a055';
+    px(0, 2, skinBrown, 2, 2); px(0, 2, skinGold);
+    px(0, 8, skinBrown, 2, 2); px(0, 9, skinGold);
+    px(4, 0, skinBrown, 4, 2); px(5, 0, skinGold, 2, 1);
+    px(4, 10, skinBrown, 4, 2); px(5, 11, skinGold, 2, 1);
+    px(2, 2, shellDark, 10, 8);
+    px(3, 3, shellBlue, 8, 6);
+    px(4, 4, shellLight, 2, 1); px(8, 4, shellLight, 2, 1);
+    px(6, 5, shellLight, 2, 2);
+    px(4, 7, shellLight, 2, 1); px(8, 7, shellLight, 2, 1);
+    px(12, 4, skinBrown, 3, 4);
+    px(13, 5, skinGold, 2, 2);
+    px(14, 5, '#000', 0.6, 0.6);
+    px(1, 5.5, skinBrown, 1, 1);
+    c.restore();
   }
-
-  c.imageSmoothingEnabled = false;
-
-  // Proporciones corregidas para que no se estire
-  const pw = h / 16;
-  const ph = w / 20;
-
-  function px(col, row, color, cols = 1, rows = 1) {
-    c.fillStyle = color;
-    c.fillRect(
-      Math.round(col * pw),
-      Math.round(row * ph),
-      Math.ceil(cols * pw),
-      Math.ceil(rows * ph)
-    );
-  }
-
-  // Colores extraídos de la imagen original
-  const shellBlue = '#1c71d8';
-  const shellDark = '#0a4da4';
-  const shellLight = '#3cc7f3';
-  const skinBrown = '#9a6b33';
-  const skinGold = '#c4a055';
-
-  // --- Aletas Traseras (lado izquierdo del dibujo horizontal) ---
-  px(0, 2, skinBrown, 2, 2); px(0, 2, skinGold); // Superior
-  px(0, 8, skinBrown, 2, 2); px(0, 9, skinGold); // Inferior
-
-  // --- Aletas Delanteras (grandes, arriba y abajo del caparazón) ---
-  px(4, 0, skinBrown, 4, 2); px(5, 0, skinGold, 2, 1); // Aleta superior
-  px(4, 10, skinBrown, 4, 2); px(5, 11, skinGold, 2, 1); // Aleta inferior
-
-  // --- Caparazón (Cuerpo central) ---
-  px(2, 2, shellDark, 10, 8); // Borde azul oscuro
-  px(3, 3, shellBlue, 8, 6);  // Interior azul
-  
-  // Patrón de brillo (Mosaico)
-  px(4, 4, shellLight, 2, 1); px(8, 4, shellLight, 2, 1);
-  px(6, 5, shellLight, 2, 2); // Centro brillante
-  px(4, 7, shellLight, 2, 1); px(8, 7, shellLight, 2, 1);
-
-  // --- Cabeza (lado derecho para que al rotar quede ARRIBA) ---
-  px(12, 4, skinBrown, 3, 4); 
-  px(13, 5, skinGold, 2, 2); // Mancha dorada en cabeza
-  px(14, 5, '#000', 0.6, 0.6); // Ojo
-
-  // --- Pequeña Cola (detrás) ---
-  px(1, 5.5, skinBrown, 1, 1);
-
-  c.restore();
-}
 
   // Rock pixel-art sprite
   function drawRockSprite(c, w, h) {
-  c.save();
-  c.imageSmoothingEnabled = false;
-  const pw = w / 10, ph = h / 10;
-
-  function px(col, row, color, cols = 1, rows = 1) {
-    c.fillStyle = color;
-    c.fillRect(
-      Math.round(col * pw),
-      Math.round(row * ph),
-      Math.ceil(cols * pw),
-      Math.ceil(rows * ph)
-    );
-  }
-
-  // --- PALETA DE COLORES (Calcada de rock.png) ---
-  const outline = '#3e322a';  // Delineado oscuro
-  const shadow  = '#5e4e42';  // Cara lateral (sombra)
-  const mid     = '#8b7a6b';  // Cara frontal (medio)
-  const light   = '#b3a291';  // Cara superior (luz)
-  const floor   = 'rgba(0,0,0,0.3)'; // Sombra suelo
-
-  // 1. Sombra en el suelo
-  c.fillStyle = floor;
-  c.fillRect(Math.round(1*pw), Math.round(8.5*ph), Math.ceil(8*pw), Math.ceil(1*ph));
-
-  // --- ESTRUCTURA BASE (Líneas más irregulares) ---
-
-  // Bloque Base Izquierda (Atrás) - Bordes mordidos
-  px(1.8, 5.2, outline, 3.5, 3.8); // Delineado
-  px(2, 5.5, mid, 3, 3);    // Frontal
-  px(2, 5.5, light, 3, 1);  // Superior
-  px(4.8, 6.2, shadow, 0.7, 2.5); // Lateral
-
-  // Bloque Base Derecha (Atrás)
-  px(5.2, 5.2, outline, 3.5, 3.8);  // Delineado
-  px(5.5, 5.5, mid, 3, 3);  // Frontal
-  px(5.5, 5.5, light, 3, 1);// Superior
-  px(8, 6.2, shadow, 0.7, 2.5);   // Lateral
-
-  // Bloque Frontal Pequeño (Al frente)
-  px(4.2, 7.8, outline, 2.8, 1.8); // Delineado
-  px(4.5, 8, mid, 2, 1.5);   // Frontal
-  px(4.5, 8, light, 2, 0.5); // Superior
-  px(6.5, 8.2, shadow, 0.5, 1.3); // Lateral
-
-  // Bloque Largo Medio (Encima)
-  px(2.8, 3.8, outline, 5.5, 2.8); // Delineado
-  px(3, 4, mid, 5, 2);      // Frontal
-  px(3, 4, light, 5, 1);    // Superior
-  px(7.8, 4.8, shadow, 0.5, 1.5); // Lateral
-
-  // Bloque Cima (Arriba)
-  px(4.2, 1.8, outline, 2.8, 2.2); // Delineado
-  px(4.5, 2, mid, 2, 1.5);   // Frontal
-  px(4.5, 2, light, 2, 0.5); // Superior
-  px(6.5, 2.2, shadow, 0.5, 1.3); // Lateral
-
-
-  // === NUEVO: TEXTURIZADO ALEATORIO (Efecto Rocoso) ===
-
-  // Función interna para poner moteado
-  function speckle(col, row, color) {
-    // Usamos Math.random para que cada roca sea única
-    if (Math.random() > 0.6) { // Solo dibuja el 40% de las veces
-      px(col, row, color, 0.4, 0.4); // Puntos muy pequeños
+    c.save();
+    c.imageSmoothingEnabled = false;
+    const pw = w / 10, ph = h / 10;
+    function px(col, row, color, cols = 1, rows = 1) {
+      c.fillStyle = color;
+      c.fillRect(
+        Math.round(col * pw),
+        Math.round(row * ph),
+        Math.ceil(cols * pw),
+        Math.ceil(rows * ph)
+      );
     }
+    const outline = '#3e322a';
+    const shadow  = '#5e4e42';
+    const mid     = '#8b7a6b';
+    const light   = '#b3a291';
+    const floor   = 'rgba(0,0,0,0.3)';
+    c.fillStyle = floor;
+    c.fillRect(Math.round(1*pw), Math.round(8.5*ph), Math.ceil(8*pw), Math.ceil(1*ph));
+    px(1.8, 5.2, outline, 3.5, 3.8);
+    px(2, 5.5, mid, 3, 3);
+    px(2, 5.5, light, 3, 1);
+    px(4.8, 6.2, shadow, 0.7, 2.5);
+    px(5.2, 5.2, outline, 3.5, 3.8);
+    px(5.5, 5.5, mid, 3, 3);
+    px(5.5, 5.5, light, 3, 1);
+    px(8, 6.2, shadow, 0.7, 2.5);
+    px(4.2, 7.8, outline, 2.8, 1.8);
+    px(4.5, 8, mid, 2, 1.5);
+    px(4.5, 8, light, 2, 0.5);
+    px(6.5, 8.2, shadow, 0.5, 1.3);
+    px(2.8, 3.8, outline, 5.5, 2.8);
+    px(3, 4, mid, 5, 2);
+    px(3, 4, light, 5, 1);
+    px(7.8, 4.8, shadow, 0.5, 1.5);
+    px(4.2, 1.8, outline, 2.8, 2.2);
+    px(4.5, 2, mid, 2, 1.5);
+    px(4.5, 2, light, 2, 0.5);
+    px(6.5, 2.2, shadow, 0.5, 1.3);
+    function speckle(col, row, color) {
+      if (Math.random() > 0.6) { px(col, row, color, 0.4, 0.4); }
+    }
+    const hLight = 'rgba(255,255,255,0.2)';
+    speckle(2.5, 6, hLight); speckle(3, 5, hLight); speckle(6, 6, hLight);
+    speckle(4, 4.5, hLight); speckle(8, 5, hLight); speckle(5, 2.5, hLight);
+    const hShadow = 'rgba(0,0,0,0.3)';
+    speckle(2, 6.5, hShadow); speckle(4, 5.5, hShadow); speckle(7, 6, hShadow);
+    speckle(5, 4.2, hShadow); speckle(6, 5, hShadow); speckle(4.5, 3, hShadow);
+    speckle(1.8, 5.5, mid); speckle(5.2, 6.2, mid);
+    speckle(2.8, 4, mid); speckle(7.8, 5.5, mid);
+    c.restore();
   }
 
-  // Moteado de luz (puntos claros sobre la cara frontal y superior)
-  const hLight = 'rgba(255,255,255,0.2)'; 
-  speckle(2.5, 6, hLight); speckle(3, 5, hLight); speckle(6, 6, hLight);
-  speckle(4, 4.5, hLight); speckle(8, 5, hLight); speckle(5, 2.5, hLight);
-
-  // Moteado de sombra (puntos oscuros para grietas internas)
-  const hShadow = 'rgba(0,0,0,0.3)';
-  speckle(2, 6.5, hShadow); speckle(4, 5.5, hShadow); speckle(7, 6, hShadow);
-  speckle(5, 4.2, hShadow); speckle(6, 5, hShadow); speckle(4.5, 3, hShadow);
-
-  // Romper el delineado (puntos de color 'mid' sobre el 'outline')
-  speckle(1.8, 5.5, mid); speckle(5.2, 6.2, mid);
-  speckle(2.8, 4, mid); speckle(7.8, 5.5, mid);
-
-  c.restore();
-}
   // Log pixel-art sprite
-function drawBarrelSprite(c, w, h) {
-   c.save();
-  c.imageSmoothingEnabled = false;
-  
-  // Usamos una cuadrícula de 12x10 como en tu código de referencia
-  const pw = w / 12, ph = h / 10;
-
-  function px(col, row, color, cols = 1, rows = 1) {
-    c.fillStyle = color;
-    c.fillRect(
-      Math.round(col * pw),
-      Math.round(row * ph),
-      Math.ceil(cols * pw),
-      Math.ceil(rows * ph)
-    );
-  }
-
-  // --- PALETA DE COLORES ---
-  const woodMid = '#6d4c41';    // Café madera medio
-  const woodDark = '#4e342e';   // Café madera oscuro (sombras/bordes)
-  const woodLight = '#8d6e63';  // Café madera claro (brillo)
-  const metalGris = '#78909c';  // Gris para las bandas (sustituye al azul)
-  const metalDark = '#455a64';  // Gris oscuro para profundidad
-
-  // 1. Sombra en el suelo
-  c.fillStyle = 'rgba(0,0,0,0.22)';
-  c.fillRect(Math.round(2 * pw), Math.round(8.5 * ph), Math.ceil(8 * pw), Math.ceil(1 * ph));
-
-  // 2. CUERPO DEL BARRIL (Forma abombada)
-  // Bordes superiores e inferiores (más estrechos)
-  px(3, 1, woodDark, 6, 1);
-  px(3, 8, woodDark, 6, 1);
-  
-  // Cuerpo principal
-  px(2, 2, woodMid, 8, 6);
-  px(1, 3, woodMid, 10, 4);
-
-  // 3. DETALLES DE LAS TABLAS (Vetas de madera)
-  px(2, 3, woodDark, 8, 1); // Línea de división superior
-  px(2, 6, woodDark, 8, 1); // Línea de división inferior
-  px(4, 4, woodLight, 4, 1); // Brillo central en la madera
-
-  // 4. BANDAS METÁLICAS (Las que eran azules, ahora grises)
-  // Banda izquierda
-  px(2, 2, metalGris, 1, 6);
-  px(2, 1.5, metalDark, 1, 0.5); // Remate superior
-  
-  // Banda derecha
-  px(9, 2, metalGris, 1, 6);
-  px(9, 1.5, metalDark, 1, 0.5); // Remate superior
-
-  // 5. LÍNEAS DE CONTORNO Y PROFUNDIDAD
-  c.strokeStyle = 'rgba(0,0,0,0.2)';
-  c.lineWidth = Math.max(1, pw * 0.3);
-  
-  // Dibujamos las divisiones verticales de las tablas
-  for (let i = 0; i < 3; i++) {
-    c.beginPath();
-    c.moveTo((4 + i * 2) * pw, 1.5 * ph);
-    c.lineTo((4 + i * 2) * pw, 8.5 * ph);
-    c.stroke();
-  }
-
-  c.restore();
+  function drawBarrelSprite(c, w, h) {
+    c.save();
+    c.imageSmoothingEnabled = false;
+    const pw = w / 12, ph = h / 10;
+    function px(col, row, color, cols = 1, rows = 1) {
+      c.fillStyle = color;
+      c.fillRect(
+        Math.round(col * pw),
+        Math.round(row * ph),
+        Math.ceil(cols * pw),
+        Math.ceil(rows * ph)
+      );
+    }
+    const woodMid = '#6d4c41';
+    const woodDark = '#4e342e';
+    const woodLight = '#8d6e63';
+    const metalGris = '#78909c';
+    const metalDark = '#455a64';
+    c.fillStyle = 'rgba(0,0,0,0.22)';
+    c.fillRect(Math.round(2 * pw), Math.round(8.5 * ph), Math.ceil(8 * pw), Math.ceil(1 * ph));
+    px(3, 1, woodDark, 6, 1);
+    px(3, 8, woodDark, 6, 1);
+    px(2, 2, woodMid, 8, 6);
+    px(1, 3, woodMid, 10, 4);
+    px(2, 3, woodDark, 8, 1);
+    px(2, 6, woodDark, 8, 1);
+    px(4, 4, woodLight, 4, 1);
+    px(2, 2, metalGris, 1, 6);
+    px(2, 1.5, metalDark, 1, 0.5);
+    px(9, 2, metalGris, 1, 6);
+    px(9, 1.5, metalDark, 1, 0.5);
+    c.strokeStyle = 'rgba(0,0,0,0.2)';
+    c.lineWidth = Math.max(1, pw * 0.3);
+    for (let i = 0; i < 3; i++) {
+      c.beginPath();
+      c.moveTo((4 + i * 2) * pw, 1.5 * ph);
+      c.lineTo((4 + i * 2) * pw, 8.5 * ph);
+      c.stroke();
+    }
+    c.restore();
   }
 
   // Bubble pixel-art sprite
@@ -418,139 +339,111 @@ function drawBarrelSprite(c, w, h) {
     c.restore();
   }
 
-function drawSeaweedSprite(c, w, h) {
-  c.save();
-  c.imageSmoothingEnabled = false;
-  
-  // Usamos una cuadrícula de 10x10 para que coincida con la escala de tus rocas
-  const pw = w / 10, ph = h / 10;
+  // ---- SEAWEED SPRITE ----
+  function drawSeaweedSprite(c, w, h) {
+    c.save();
+    c.imageSmoothingEnabled = false;
+    const pw = w / 10, ph = h / 10;
 
-  function px(col, row, color, cols = 1, rows = 1) {
-    c.fillStyle = color;
-    c.fillRect(
-      Math.round(col * pw),
-      Math.round(row * ph),
-      Math.ceil(cols * pw),
-      Math.ceil(rows * ph)
-    );
+    function px(col, row, color, cols = 1, rows = 1) {
+      c.fillStyle = color;
+      c.fillRect(
+        Math.round(col * pw),
+        Math.round(row * ph),
+        Math.ceil(cols * pw),
+        Math.ceil(rows * ph)
+      );
+    }
+
+    const weedDark  = '#2e7d32';
+    const weedMid   = '#43a047';
+    const weedLight = '#76c442';
+    const weedTip   = '#b5e048';
+
+    // Sombra base
+    c.fillStyle = 'rgba(0,0,0,0.12)';
+    c.fillRect(Math.round(1*pw), Math.round(9*ph), Math.ceil(8*pw), Math.ceil(0.8*ph));
+
+    // --- ALGA IZQUIERDA ---
+    px(1.5, 4, weedDark,  1, 5.5); // tallo
+    px(0.5, 5, weedMid,   1.5, 1.2); // hoja izq
+    px(2,   6, weedMid,   1.5, 1.2); // hoja der
+    px(0.8, 3.2, weedLight, 1.5, 1); // hoja superior
+    px(1.3, 2.2, weedTip,  1, 1.2);  // punta
+
+    // --- ALGA CENTRAL (la más alta) ---
+    px(4.5, 1.5, weedDark, 1.2, 8); // tallo
+    px(3.2, 3,   weedMid,  1.8, 1.2); // hoja izq
+    px(5.5, 4.2, weedMid,  1.8, 1.2); // hoja der
+    px(3,   5.5, weedMid,  1.8, 1.2); // hoja izq baja
+    px(5.5, 6.8, weedMid,  1.8, 1.2); // hoja der baja
+    px(4.2, 0.5, weedLight,1.6, 1.2); // hoja cima
+    px(4.5, -0.3,weedTip,  1.2, 1);   // punta (puede salir ligeramente)
+
+    // --- ALGA DERECHA ---
+    px(8,   3.5, weedDark, 1, 6);   // tallo
+    px(6.8, 4.5, weedMid,  1.5, 1.2); // hoja izq
+    px(8.8, 5.5, weedMid,  1.5, 1.2); // hoja der
+    px(7,   2.8, weedLight,1.5, 1);  // hoja superior
+    px(7.8, 1.8, weedTip,  1, 1.2);  // punta
+
+    // Brillo sutil en el tallo central
+    px(4.8, 2.5, 'rgba(255,255,255,0.18)', 0.5, 3);
+
+    c.restore();
   }
-
-  // --- PALETA DE COLORES (Verdes Píxel Art) ---
-  const weedDark = '#33691e';  // Verde oscuro (base y sombras)
-  const weedMid = '#558b2f';   // Verde medio (cuerpo principal)
-  const weedLight = '#8bc34a';  // Verde claro (luz/puntas)
-  const genShadow = 'rgba(0,0,0,0.15)'; // Sombra base sutil
-
-  // 1. SOMBRA BASE (en el suelo, bajo las algas)
-  c.fillStyle = genShadow;
-  c.fillRect(Math.round(1*pw), Math.round(8.5*ph), Math.ceil(8*pw), Math.ceil(1*ph));
-
-  // --- DIBUJO DE LAS 3 ALGAS (De izquierda a derecha) ---
-
-  // A. ALGA IZQUIERDA (Pequeña y ancha)
-  // Tallo
-  px(2, 6, weedDark, 1, 3);
-  // Hojas
-  px(1.5, 7, weedMid); px(2.5, 6.5, weedMid);
-  px(2, 5.5, weedLight); // Punta
-
-  // B. ALGA CENTRAL (La más alta y recta)
-  // Tallo principal
-  px(5, 3, weedDark, 1, 6);
-  // Hojas laterales
-  px(4.5, 7, weedMid); px(5.5, 6, weedMid);
-  px(4.5, 5, weedMid); px(5.5, 4, weedMid);
-  px(4.8, 3.5, weedLight); // Punta
-
-  // C. ALGA DERECHA (Mediana y rizada)
-  // Tallo base
-  px(8, 5, weedDark, 1, 4);
-  // Rizos
-  px(7.5, 7.5, weedMid); px(8.5, 6.5, weedMid);
-  px(7.5, 5.5, weedMid); px(8.5, 4.5, weedMid);
-  px(8, 3.5, weedLight); // Punta
-
-  // --- DETALLES DE TEXTURA (Puntos aleatorios sutiles) ---
-  if (Math.random() > 0.5) {
-    px(5.2, 4.2, weedLight, 0.5, 0.5); // Brillo central
-    px(2.1, 7.1, weedDark, 0.5, 0.5);  // Sombra pequeña
-    px(8.1, 5.1, weedDark, 0.5, 0.5);  // Sombra pequeña
-  }
-
-  c.restore();
-}
 
   // ---- BACKGROUND ----
   let bgPattern = null;
   function buildBgPattern() {
-  const bc = document.createElement('canvas');
-  const bw = 128, bh = 128; // Tamaño un poco más grande para mejor variedad
-  bc.width = bw; bc.height = bh;
-  const bx = bc.getContext('2d');
-  bx.imageSmoothingEnabled = false;
-
-  // Fondo transparente o color base sólido (sin degradado)
-  bx.fillStyle = '#4FC3F7'; 
-  bx.fillRect(0, 0, bw, bh);
-
-  // Red de agua (Cáusticas) que conectan en los bordes
-  bx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-  bx.lineWidth = 2;
-  
-  // Dibujamos líneas que se envuelven (wrapping) para que no se note el corte
-  for (let i = 0; i < 3; i++) {
-    bx.beginPath();
-    for (let x = 0; x <= bw; x += 5) {
-      // Usamos una función seno que sea múltiplo del ancho para que el inicio y fin coincidan
-      const py = (i * 40) + Math.sin(x * (Math.PI * 2 / bw)) * 5;
-      x === 0 ? bx.moveTo(x, py) : bx.lineTo(x, py);
+    const bc = document.createElement('canvas');
+    const bw = 128, bh = 128;
+    bc.width = bw; bc.height = bh;
+    const bx = bc.getContext('2d');
+    bx.imageSmoothingEnabled = false;
+    bx.fillStyle = '#4FC3F7';
+    bx.fillRect(0, 0, bw, bh);
+    bx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    bx.lineWidth = 2;
+    for (let i = 0; i < 3; i++) {
+      bx.beginPath();
+      for (let x = 0; x <= bw; x += 5) {
+        const py = (i * 40) + Math.sin(x * (Math.PI * 2 / bw)) * 5;
+        x === 0 ? bx.moveTo(x, py) : bx.lineTo(x, py);
+      }
+      bx.stroke();
     }
-    bx.stroke();
+    bx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    for (let i = 0; i < 8; i++) {
+      bx.fillRect(Math.random()*bw, Math.random()*bh, 2, 2);
+    }
+    bgPattern = ctx.createPattern(bc, 'repeat');
   }
-
-  // Burbujas aleatorias sutiles
-  bx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-  for (let i = 0; i < 8; i++) {
-    bx.fillRect(Math.random()*bw, Math.random()*bh, 2, 2);
-  }
-
-  bgPattern = ctx.createPattern(bc, 'repeat');
-}
 
   function drawBackground() {
-  if (!bgPattern) buildBgPattern();
-  
-  // 1. Color base azul cielo en TODO el canvas primero
-  ctx.fillStyle = '#81D4FA';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // 2. Dibujamos el patrón con textura encima
-  ctx.save();
-  // El offset hace que el agua "fluya" hacia abajo
-  ctx.translate(0, bgOffset % 128);
-  ctx.fillStyle = bgPattern;
-  // Dibujamos un área más grande para cubrir el movimiento
-  ctx.fillRect(0, -128, canvas.width, canvas.height + 256);
-  ctx.restore();
-
-  // 3. Un degradado SUAVE encima de todo para dar profundidad sin cuadros
-  const globalGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  globalGrad.addColorStop(0, 'rgba(255, 255, 255, 0.1)'); // Brillo arriba
-  globalGrad.addColorStop(1, 'rgba(0, 0, 0, 0.05)');    // Sombra mínima abajo
-  ctx.fillStyle = globalGrad;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // 4. Líneas de carriles (opcional, muy sutiles)
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-  ctx.setLineDash([5, 15]);
-  for (let i = 1; i < LANES; i++) {
-    ctx.beginPath();
-    ctx.moveTo(i * LANE_W, 0);
-    ctx.lineTo(i * LANE_W, canvas.height);
-    ctx.stroke();
+    if (!bgPattern) buildBgPattern();
+    ctx.fillStyle = '#81D4FA';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(0, bgOffset % 128);
+    ctx.fillStyle = bgPattern;
+    ctx.fillRect(0, -128, canvas.width, canvas.height + 256);
+    ctx.restore();
+    const globalGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    globalGrad.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+    globalGrad.addColorStop(1, 'rgba(0, 0, 0, 0.05)');
+    ctx.fillStyle = globalGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.setLineDash([5, 15]);
+    for (let i = 1; i < LANES; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * LANE_W, 0);
+      ctx.lineTo(i * LANE_W, canvas.height);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
   }
-  ctx.setLineDash([]);
-}
 
   // ---- PLAYER ----
   let fishFrame = 0;
@@ -654,8 +547,7 @@ function drawSeaweedSprite(c, w, h) {
   function spawnBubble() {
     const margin = BUBBLE_R + 10;
     const x = margin + Math.random() * (canvas.width - margin * 2);
-    // Aparece desde arriba del canvas
-    const y = -BUBBLE_R * 2; // arriba del canvas
+    const y = -BUBBLE_R * 2;
     const sp = document.createElement('canvas');
     sp.width = BUBBLE_R * 2 + 4;
     sp.height = BUBBLE_R * 2 + 4;
@@ -665,7 +557,7 @@ function drawSeaweedSprite(c, w, h) {
       r: BUBBLE_R,
       sprite: sp,
       floatOffset: Math.random() * Math.PI * 2,
-      vy: 3.5, // fijo hacia abajo
+      vy: 3.5,
       born: Date.now()
     });
   }
@@ -673,8 +565,7 @@ function drawSeaweedSprite(c, w, h) {
   function updateBubbles(delta) {
     for (let i = bubbles.length - 1; i >= 0; i--) {
       const b = bubbles[i];
-      // Cae hacia abajo escalado con la velocidad del juego
-      b.y = b.y + b.vy * (delta / 16); // siempre baja
+      b.y = b.y + b.vy * (delta / 16);
       if (b.y > canvas.height + BUBBLE_R * 4) {
         bubbles.splice(i, 1);
       }
@@ -691,32 +582,54 @@ function drawSeaweedSprite(c, w, h) {
       ctx.restore();
     }
   }
-  // algas
-function spawnAlgae() {
+
+  // ---- ALGAE ----
+  // Timer separado para controlar la frecuencia de aparición de algas
+  let algaeTimer = 0;
+  const ALGAE_INTERVAL = 2200; // cada ~2.2 segundos aparece una alga
+
+  function spawnAlgae() {
     const lane = Math.floor(Math.random() * LANES);
     const x = lane * LANE_W + (LANE_W - OBSTACLE_W) / 2;
     algaes.push({
-      x, y: -OBSTACLE_H - 10,
-      w: OBSTACLE_W, h: OBSTACLE_H,
-      speed: BASE_SPEED * speedMul * 0.9 // Un poco más lentas que los obstáculos
+      x,
+      y: -OBSTACLE_H - 10,
+      w: OBSTACLE_W,
+      h: OBSTACLE_H,
+      // Las algas caen un poco más despacio que los obstáculos, así dan tiempo a recogerlas
+      speed: BASE_SPEED * speedMul * 0.75
     });
   }
 
   function updateAlgaes(delta) {
+    // Mover las algas existentes
     for (let i = algaes.length - 1; i >= 0; i--) {
       algaes[i].y += algaes[i].speed * (delta / 16);
-      if (algaes[i].y > canvas.height + 60) algaes.splice(i, 1);
+      if (algaes[i].y > canvas.height + 60) {
+        algaes.splice(i, 1);
+      }
     }
-    // Aparecen cada cierto tiempo (puedes ajustar el azar)
-    if (Math.random() < 0.01) spawnAlgae(); 
+
+    // Generar nuevas algas con su propio temporizador
+    algaeTimer += delta;
+    if (algaeTimer >= ALGAE_INTERVAL) {
+      algaeTimer = 0;
+      spawnAlgae();
+    }
   }
 
   function drawAlgaes() {
-    const sp = getSprite('seaweed', (c, w, h) => drawSeaweedSprite(c, w, h), OBSTACLE_W*2, OBSTACLE_H*2);
+    const sp = getSprite('seaweed', (c, w, h) => drawSeaweedSprite(c, w, h), OBSTACLE_W * 2, OBSTACLE_H * 2);
     for (const a of algaes) {
+      // Pequeño brillo verde detrás para que destaquen frente a los obstáculos
+      ctx.save();
+      ctx.shadowColor = '#69f0ae';
+      ctx.shadowBlur = 10;
       ctx.drawImage(sp, a.x, a.y, a.w, a.h);
+      ctx.restore();
     }
   }
+
   // ---- PARTICLES ----
   function spawnParticles(x, y, color, n = 8) {
     for (let i = 0; i < n; i++) {
@@ -761,6 +674,7 @@ function spawnAlgae() {
     const px = PLAYER.x + 6, py = PLAYER.y + 4;
     const pw = PLAYER.w - 12, ph = PLAYER.h - 8;
 
+    // Obstáculos → pierdes vida
     if (invulnTimer <= 0) {
       for (let i = obstacles.length - 1; i >= 0; i--) {
         const o = obstacles[i];
@@ -775,6 +689,7 @@ function spawnAlgae() {
       }
     }
 
+    // Burbujas → recuperas vida
     for (let i = bubbles.length - 1; i >= 0; i--) {
       const b = bubbles[i];
       const sway = Math.sin(Date.now() * 0.0015 + b.floatOffset) * 3;
@@ -785,9 +700,37 @@ function spawnAlgae() {
         collectBubble(i);
         break;
       }
-    
-    
     }
+
+    // Algas → sumas contador, sin daño
+    for (let i = algaes.length - 1; i >= 0; i--) {
+      const a = algaes[i];
+      if (
+        px < a.x + a.w - 4 && px + pw > a.x + 4 &&
+        py < a.y + a.h - 4 && py + ph > a.y + 4
+      ) {
+        collectAlgae(i);
+        break;
+      }
+    }
+  }
+
+  function collectAlgae(idx) {
+    const a = algaes[idx];
+    // Partículas verdes al recolectar
+    spawnParticles(a.x + a.w / 2, a.y + a.h / 2, '#69f0ae', 10);
+    spawnParticles(a.x + a.w / 2, a.y + a.h / 2, '#b5e048', 5);
+    algaes.splice(idx, 1);
+
+    algaeCount++;
+
+    // Actualizar récord si corresponde
+    if (algaeCount > hiAlgae) {
+      hiAlgae = algaeCount;
+      localStorage.setItem('goldfish_algae_hi', hiAlgae.toString());
+    }
+
+    updateAlgaeUI();
   }
 
   function loseLife(ox, oy) {
@@ -834,6 +777,11 @@ function spawnAlgae() {
     }
   }
 
+  function updateAlgaeUI() {
+    algaeDisplay.textContent = algaeCount;
+    hiAlgaeDisplay.textContent = hiAlgae;
+  }
+
   function updateScoreUI() {
     const km = (score / 100).toFixed(2);
     scoreDisplay.textContent = km + ' km';
@@ -872,11 +820,13 @@ function spawnAlgae() {
     updatePlayer(dt);
     updateObstacles(dt);
     updateBubbles(dt);
+    updateAlgaes(dt);   // ← algas integradas al loop
     updateParticles(dt);
     checkCollisions();
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
+    drawAlgaes();       // ← se dibujan antes que obstáculos para quedar detrás
     drawObstacles();
     drawBubbles();
     drawPlayer();
@@ -894,6 +844,9 @@ function spawnAlgae() {
     obstacles = [];
     bubbles = [];
     particles = [];
+    algaes = [];          // limpiar algas
+    algaeCount = 0;       // reiniciar contador de algas
+    algaeTimer = 0;       // reiniciar temporizador de algas
     bubbleSpawned = [false, false];
     obstacleTimer = 0;
     obstacleInterval = OBSTACLE_INTERVAL_BASE;
@@ -906,6 +859,7 @@ function spawnAlgae() {
     initPlayer();
     updateLivesUI();
     updateScoreUI();
+    updateAlgaeUI();      // mostrar 0 algas al iniciar
 
     btnStart.style.display = 'none';
     gameOverScore.style.display = 'none';
@@ -946,6 +900,11 @@ function spawnAlgae() {
     }
     hiscoreDisplay.textContent = (Math.max(score, hiRaw) / 100).toFixed(2) + ' km';
 
+    // También guardamos el récord de algas si se superó
+    if (algaeCount > parseInt(localStorage.getItem('goldfish_algae_hi') || '0')) {
+      localStorage.setItem('goldfish_algae_hi', algaeCount.toString());
+    }
+
     overlay.classList.remove('hidden');
     overlayTitle.style.display = 'block';
     overlayTitle.textContent = 'GAME OVER';
@@ -953,8 +912,20 @@ function spawnAlgae() {
     startFishAnim.style.display = 'none';
     countdownEl.style.display = 'none';
     gameOverScore.style.display = 'block';
-    gameOverScore.innerHTML = `Distancia recorrida: <span style="color:var(--gold)">${km} km</span><br>` +
-      (isNew ? `<span style="color:#69f0ae">¡NUEVO RÉCORD!</span>` : `Récord: <span style="color:#69f0ae">${(hiRaw/100).toFixed(2)} km</span>`);
+
+    const algaeHiRaw = parseInt(localStorage.getItem('goldfish_algae_hi') || '0');
+    const isNewAlgae = algaeCount >= algaeHiRaw && algaeCount > 0;
+
+    gameOverScore.innerHTML =
+      `Distancia recorrida: <span style="color:var(--gold)">${km} km</span><br>` +
+      `Algas recolectadas: <span style="color:#69f0ae">${algaeCount}</span><br>` +
+      (isNew
+        ? `<span style="color:#69f0ae">¡NUEVO RÉCORD DE DISTANCIA!</span>`
+        : `Récord distancia: <span style="color:#69f0ae">${(hiRaw/100).toFixed(2)} km</span>`) +
+      (isNewAlgae && algaeCount > 0
+        ? `<br><span style="color:#b5e048">¡NUEVO RÉCORD DE ALGAS!</span>`
+        : `<br>Récord algas: <span style="color:#b5e048">${algaeHiRaw}</span>`);
+
     btnStart.textContent = 'JUGAR DE NUEVO';
     btnStart.style.display = 'block';
   }
@@ -975,6 +946,7 @@ function spawnAlgae() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
     drawBackground();
     updateLivesUI();
+    updateAlgaeUI();
     hiscoreDisplay.textContent = (hiScore/100).toFixed(2) + ' km';
   }
 
@@ -1006,19 +978,18 @@ function spawnAlgae() {
   });
 
   btnStart.addEventListener('click', startGame);
-document.addEventListener('keydown', function(event) {
-  if (event.code === 'Space') {
-    event.preventDefault(); // evita scroll de la página
 
-    const modal = bootstrap.Modal.getOrCreateInstance(modalInstr);
-
-    if (modalInstr.classList.contains('show')) {
-      modal.hide(); // cerrará y ejecutará hidden.bs.modal
-    } else {
-      modal.show(); // abrirá y ejecutará show.bs.modal
+  document.addEventListener('keydown', function(event) {
+    if (event.code === 'Space') {
+      event.preventDefault();
+      const modal = bootstrap.Modal.getOrCreateInstance(modalInstr);
+      if (modalInstr.classList.contains('show')) {
+        modal.hide();
+      } else {
+        modal.show();
+      }
     }
-  }
-});
+  });
 
   // ---- PAUSE ON INSTRUCCIONES MODAL ----
   const modalInstr = document.getElementById('modalInstrucciones');
@@ -1056,5 +1027,6 @@ document.addEventListener('keydown', function(event) {
   resize();
   showStart();
   updateLivesUI();
+  updateAlgaeUI();
 
 })();
