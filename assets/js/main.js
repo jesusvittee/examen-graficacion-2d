@@ -247,44 +247,70 @@
   c.restore();
 }
   // Log pixel-art sprite
-  function drawLogSprite(c, w, h) {
-    c.save();
-    c.imageSmoothingEnabled = false;
-    const pw = w / 12, ph = h / 10;
-    function px(col, row, color, cols=1, rows=1) {
-      c.fillStyle = color;
-      c.fillRect(Math.round(col*pw), Math.round(row*ph), Math.ceil(cols*pw), Math.ceil(rows*ph));
-    }
-    c.fillStyle = 'rgba(0,0,0,0.22)';
-    c.fillRect(Math.round(1*pw), Math.round(8.4*ph), Math.ceil(10*pw), Math.ceil(1.2*ph));
-    px(0,3,'#5d3317',2,4);
-    px(0,2,'#4e2700',2,1); px(0,7,'#4e2700',2,1);
-    c.strokeStyle = '#6d4c41'; c.lineWidth = Math.max(1, pw*0.6);
-    for(let r=0.3;r<=0.9;r+=0.3){
-      c.beginPath();
-      c.ellipse(1.2*pw, 5*ph, 0.9*pw*r, 1.6*ph*r, 0, 0, Math.PI*2);
-      c.stroke();
-    }
-    px(2,2,'#4e2700',8,1);
-    px(2,3,'#8d5524',8,1);
-    px(2,4,'#a0622a',8,2);
-    px(2,6,'#8d5524',8,1);
-    px(2,7,'#4e2700',8,1);
-    c.strokeStyle = 'rgba(62,26,0,0.4)'; c.lineWidth = Math.max(1,pw*0.4);
-    for(let i=0;i<4;i++){
-      c.beginPath();
-      c.moveTo((3+i*2)*pw, 2*ph);
-      c.quadraticCurveTo((4+i*2)*pw, 5*ph, (3+i*2)*pw, 8*ph);
-      c.stroke();
-    }
-    c.strokeStyle = '#33691eaa'; c.lineWidth = Math.max(1,pw*0.5);
-    for(let i=0;i<3;i++){
-      c.beginPath();
-      c.moveTo((3+i*2.5)*pw, 2*ph);
-      c.quadraticCurveTo((4+i*2.5)*pw, 0.5*ph, (5+i*2.5)*pw, 1.2*ph);
-      c.stroke();
-    }
-    c.restore();
+function drawLogSprite(c, w, h) {
+   c.save();
+  c.imageSmoothingEnabled = false;
+  
+  // Usamos una cuadrícula de 12x10 como en tu código de referencia
+  const pw = w / 12, ph = h / 10;
+
+  function px(col, row, color, cols = 1, rows = 1) {
+    c.fillStyle = color;
+    c.fillRect(
+      Math.round(col * pw),
+      Math.round(row * ph),
+      Math.ceil(cols * pw),
+      Math.ceil(rows * ph)
+    );
+  }
+
+  // --- PALETA DE COLORES ---
+  const woodMid = '#6d4c41';    // Café madera medio
+  const woodDark = '#4e342e';   // Café madera oscuro (sombras/bordes)
+  const woodLight = '#8d6e63';  // Café madera claro (brillo)
+  const metalGris = '#78909c';  // Gris para las bandas (sustituye al azul)
+  const metalDark = '#455a64';  // Gris oscuro para profundidad
+
+  // 1. Sombra en el suelo
+  c.fillStyle = 'rgba(0,0,0,0.22)';
+  c.fillRect(Math.round(2 * pw), Math.round(8.5 * ph), Math.ceil(8 * pw), Math.ceil(1 * ph));
+
+  // 2. CUERPO DEL BARRIL (Forma abombada)
+  // Bordes superiores e inferiores (más estrechos)
+  px(3, 1, woodDark, 6, 1);
+  px(3, 8, woodDark, 6, 1);
+  
+  // Cuerpo principal
+  px(2, 2, woodMid, 8, 6);
+  px(1, 3, woodMid, 10, 4);
+
+  // 3. DETALLES DE LAS TABLAS (Vetas de madera)
+  px(2, 3, woodDark, 8, 1); // Línea de división superior
+  px(2, 6, woodDark, 8, 1); // Línea de división inferior
+  px(4, 4, woodLight, 4, 1); // Brillo central en la madera
+
+  // 4. BANDAS METÁLICAS (Las que eran azules, ahora grises)
+  // Banda izquierda
+  px(2, 2, metalGris, 1, 6);
+  px(2, 1.5, metalDark, 1, 0.5); // Remate superior
+  
+  // Banda derecha
+  px(9, 2, metalGris, 1, 6);
+  px(9, 1.5, metalDark, 1, 0.5); // Remate superior
+
+  // 5. LÍNEAS DE CONTORNO Y PROFUNDIDAD
+  c.strokeStyle = 'rgba(0,0,0,0.2)';
+  c.lineWidth = Math.max(1, pw * 0.3);
+  
+  // Dibujamos las divisiones verticales de las tablas
+  for (let i = 0; i < 3; i++) {
+    c.beginPath();
+    c.moveTo((4 + i * 2) * pw, 1.5 * ph);
+    c.lineTo((4 + i * 2) * pw, 8.5 * ph);
+    c.stroke();
+  }
+
+  c.restore();
   }
 
   // Bubble pixel-art sprite
