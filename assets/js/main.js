@@ -96,7 +96,7 @@
   }
 
   // Goldfish pixel-art sprite
- function drawGoldfishSprite(c, w, h, flip = false) {
+ function drawTurtleSprite(c, w, h, flip = false) {
   c.save();
 
   // Ajuste para orientación vertical (Mantenido igual)
@@ -247,7 +247,7 @@
   c.restore();
 }
   // Log pixel-art sprite
-function drawLogSprite(c, w, h) {
+function drawBarrelSprite(c, w, h) {
    c.save();
   c.imageSmoothingEnabled = false;
   
@@ -470,7 +470,7 @@ function drawLogSprite(c, w, h) {
     vg.addColorStop(1, 'rgba(3,8,25,0.55)');
     ctx.fillStyle = vg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = 'rgba(66,165,245,0.07)';
+    ctx.strokeStyle = 'rgba(80, 154, 215, 0.07)';
     ctx.lineWidth = 1;
     for (let i = 1; i < LANES; i++) {
       ctx.setLineDash([6, 10]);
@@ -519,7 +519,7 @@ function drawLogSprite(c, w, h) {
   }
 
   function drawPlayer() {
-    const sp = getSprite('goldfish', (c, w, h) => drawGoldfishSprite(c, w, h, false), PLAYER_W*2, PLAYER_H*2);
+    const sp = getSprite('goldfish', (c, w, h) => drawTurtleSprite(c, w, h, false), PLAYER_W*2, PLAYER_H*2);
     ctx.save();
     if (invulnTimer > 0) {
       ctx.globalAlpha = 0.5 + 0.5 * Math.sin(Date.now() * 0.018);
@@ -570,7 +570,7 @@ function drawLogSprite(c, w, h) {
       if (o.type === 'rock') {
         sp = getSprite('rock', (c,w,h) => drawRockSprite(c,w,h), OBSTACLE_W*2, OBSTACLE_H*2);
       } else {
-        sp = getSprite('log', (c,w,h) => drawLogSprite(c,w,h), OBSTACLE_W*2, OBSTACLE_H*2);
+        sp = getSprite('log', (c,w,h) => drawBarrelSprite(c,w,h), OBSTACLE_W*2, OBSTACLE_H*2);
       }
       ctx.save();
       ctx.shadowColor = 'rgba(0,100,255,0.18)';

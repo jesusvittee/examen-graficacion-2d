@@ -40,3 +40,5 @@ Tipos de obstáculos normales y especiales
 Cómo debe sentirse el ritmo del juego
 Cómo evitar que el juego se vuelva repetitivo
 Cómo mejorar la experiencia respecto a mi versión 1
+
+Habilidad que le permita no chocar por 3 segundo y que no le afecte nada
