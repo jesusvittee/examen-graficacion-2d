@@ -162,33 +162,90 @@
 
   // Rock pixel-art sprite
   function drawRockSprite(c, w, h) {
-    c.save();
-    c.imageSmoothingEnabled = false;
-    const pw = w / 10, ph = h / 10;
-    function px(col, row, color, cols=1, rows=1) {
-      c.fillStyle = color;
-      c.fillRect(Math.round(col*pw), Math.round(row*ph), Math.ceil(cols*pw), Math.ceil(rows*ph));
-    }
-    c.fillStyle = 'rgba(0,0,0,0.28)';
-    c.fillRect(Math.round(1*pw), Math.round(8.5*ph), Math.ceil(8*pw), Math.ceil(1.2*ph));
-    px(3,1,'#9e9e9e',4,1);
-    px(2,2,'#bdbdbd',6,1);
-    px(1,3,'#eeeeee',1,1); px(2,3,'#bdbdbd',5,1); px(7,3,'#757575',1,1);
-    px(1,4,'#e0e0e0',1,1); px(2,4,'#bdbdbd',5,1); px(7,4,'#616161',1,1); px(8,4,'#424242',1,1);
-    px(1,5,'#9e9e9e',1,1); px(2,5,'#bdbdbd',4,1); px(6,5,'#757575',2,1);
-    px(2,6,'#757575',5,1);
-    px(3,7,'#616161',4,1);
-    px(2,3,'#eeeeee',2,2);
-    px(3,3,'#558b2f',2,1);
-    px(6,5,'#33691e',2,1);
-    c.strokeStyle = '#21212199';
-    c.lineWidth = Math.max(1, pw*0.5);
-    c.beginPath();
-    c.moveTo(5*pw, 2*ph); c.lineTo(5.5*pw, 5*ph); c.lineTo(5*pw, 7*ph);
-    c.stroke();
-    c.restore();
+  c.save();
+  c.imageSmoothingEnabled = false;
+  const pw = w / 10, ph = h / 10;
+
+  function px(col, row, color, cols = 1, rows = 1) {
+    c.fillStyle = color;
+    c.fillRect(
+      Math.round(col * pw),
+      Math.round(row * ph),
+      Math.ceil(cols * pw),
+      Math.ceil(rows * ph)
+    );
   }
 
+  // --- PALETA DE COLORES (Calcada de rock.png) ---
+  const outline = '#3e322a';  // Delineado oscuro
+  const shadow  = '#5e4e42';  // Cara lateral (sombra)
+  const mid     = '#8b7a6b';  // Cara frontal (medio)
+  const light   = '#b3a291';  // Cara superior (luz)
+  const floor   = 'rgba(0,0,0,0.3)'; // Sombra suelo
+
+  // 1. Sombra en el suelo
+  c.fillStyle = floor;
+  c.fillRect(Math.round(1*pw), Math.round(8.5*ph), Math.ceil(8*pw), Math.ceil(1*ph));
+
+  // --- ESTRUCTURA BASE (Líneas más irregulares) ---
+
+  // Bloque Base Izquierda (Atrás) - Bordes mordidos
+  px(1.8, 5.2, outline, 3.5, 3.8); // Delineado
+  px(2, 5.5, mid, 3, 3);    // Frontal
+  px(2, 5.5, light, 3, 1);  // Superior
+  px(4.8, 6.2, shadow, 0.7, 2.5); // Lateral
+
+  // Bloque Base Derecha (Atrás)
+  px(5.2, 5.2, outline, 3.5, 3.8);  // Delineado
+  px(5.5, 5.5, mid, 3, 3);  // Frontal
+  px(5.5, 5.5, light, 3, 1);// Superior
+  px(8, 6.2, shadow, 0.7, 2.5);   // Lateral
+
+  // Bloque Frontal Pequeño (Al frente)
+  px(4.2, 7.8, outline, 2.8, 1.8); // Delineado
+  px(4.5, 8, mid, 2, 1.5);   // Frontal
+  px(4.5, 8, light, 2, 0.5); // Superior
+  px(6.5, 8.2, shadow, 0.5, 1.3); // Lateral
+
+  // Bloque Largo Medio (Encima)
+  px(2.8, 3.8, outline, 5.5, 2.8); // Delineado
+  px(3, 4, mid, 5, 2);      // Frontal
+  px(3, 4, light, 5, 1);    // Superior
+  px(7.8, 4.8, shadow, 0.5, 1.5); // Lateral
+
+  // Bloque Cima (Arriba)
+  px(4.2, 1.8, outline, 2.8, 2.2); // Delineado
+  px(4.5, 2, mid, 2, 1.5);   // Frontal
+  px(4.5, 2, light, 2, 0.5); // Superior
+  px(6.5, 2.2, shadow, 0.5, 1.3); // Lateral
+
+
+  // === NUEVO: TEXTURIZADO ALEATORIO (Efecto Rocoso) ===
+
+  // Función interna para poner moteado
+  function speckle(col, row, color) {
+    // Usamos Math.random para que cada roca sea única
+    if (Math.random() > 0.6) { // Solo dibuja el 40% de las veces
+      px(col, row, color, 0.4, 0.4); // Puntos muy pequeños
+    }
+  }
+
+  // Moteado de luz (puntos claros sobre la cara frontal y superior)
+  const hLight = 'rgba(255,255,255,0.2)'; 
+  speckle(2.5, 6, hLight); speckle(3, 5, hLight); speckle(6, 6, hLight);
+  speckle(4, 4.5, hLight); speckle(8, 5, hLight); speckle(5, 2.5, hLight);
+
+  // Moteado de sombra (puntos oscuros para grietas internas)
+  const hShadow = 'rgba(0,0,0,0.3)';
+  speckle(2, 6.5, hShadow); speckle(4, 5.5, hShadow); speckle(7, 6, hShadow);
+  speckle(5, 4.2, hShadow); speckle(6, 5, hShadow); speckle(4.5, 3, hShadow);
+
+  // Romper el delineado (puntos de color 'mid' sobre el 'outline')
+  speckle(1.8, 5.5, mid); speckle(5.2, 6.2, mid);
+  speckle(2.8, 4, mid); speckle(7.8, 5.5, mid);
+
+  c.restore();
+}
   // Log pixel-art sprite
   function drawLogSprite(c, w, h) {
     c.save();
