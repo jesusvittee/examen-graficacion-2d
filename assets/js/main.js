@@ -34,7 +34,6 @@
     if (w * (1/0.62) > availH) { h = availH - 4; w = Math.floor(h * 0.62); }
     canvas.width = w;
     canvas.height = h;
-    // Sync overlay size to canvas
     const gameArea = document.getElementById('game-area');
     overlay.style.width = w + 'px';
     overlay.style.height = h + 'px';
@@ -55,21 +54,21 @@
   const BASE_SPEED = 2.2;
   const MAX_SPEED = 7.5;
   const INVULN_MS = 1800;
-  const OBSTACLE_INTERVAL_BASE = 1100; // ms
-  const SPEED_INCREASE_INTERVAL = 12000; // ms
-  const RANDOM_SLOWDOWN_CHANCE = 0.25; // probability per speed check
+  const OBSTACLE_INTERVAL_BASE = 1100;
+  const SPEED_INCREASE_INTERVAL = 12000;
+  const RANDOM_SLOWDOWN_CHANCE = 0.25;
 
   let hiScore = parseFloat(localStorage.getItem('goldfish_hi') || '0');
 
   // ---- STATE ----
-  let gameState = 'start'; // start | countdown | playing | gameover
-  let score = 0; // km * 100
+  let gameState = 'start';
+  let score = 0;
   let lives = 3;
   let speedMul = 1.0;
   let lastTimestamp = 0;
   let bgOffset = 0;
   let invulnTimer = 0;
-  let bubbleSpawned = [false, false]; // [after 1st death, after 2nd death]
+  let bubbleSpawned = [false, false];
   let obstacleTimer = 0;
   let obstacleInterval = OBSTACLE_INTERVAL_BASE;
   let speedTimer = 0;
@@ -83,7 +82,7 @@
   let bubbles = [];
   let particles = [];
 
-  // ---- SPRITE GENERATORS ---- (Canvas-drawn pseudo-PNG sprites)
+  // ---- SPRITE GENERATORS ----
   const spriteCache = {};
 
   function getSprite(key, drawFn, w, h) {
@@ -101,57 +100,32 @@
     c.save();
     if (flip) { c.scale(-1,1); c.translate(-w,0); }
     c.imageSmoothingEnabled = false;
-
-    // Pixel grid: 16x10 base, scaled to w,h
     const pw = w / 16, ph = h / 10;
-
     function px(col, row, color, cols=1, rows=1) {
       c.fillStyle = color;
       c.fillRect(Math.round(col*pw), Math.round(row*ph), Math.ceil(cols*pw), Math.ceil(rows*ph));
     }
-
-    // Tail (left side) - fan shape
     px(0,2,'#ff4400'); px(0,3,'#ff6600'); px(0,4,'#ff4400');
     px(1,1,'#ff5500'); px(1,2,'#ff8800'); px(1,3,'#ffaa00'); px(1,4,'#ff8800'); px(1,5,'#ff5500');
-
-    // Body
     const bodyColor = '#ff8c00';
     const bodyHi = '#ffcc44';
     const bodyShad = '#cc4400';
-    // row 2
     px(2,2,bodyHi); px(3,2,bodyHi); px(4,2,bodyHi); px(5,2,bodyColor); px(6,2,bodyColor);
-    // row 3
     px(2,3,bodyHi); px(3,3,bodyHi); px(4,3,bodyColor); px(5,3,bodyColor); px(6,3,bodyColor); px(7,3,bodyColor);
-    // row 4 (widest)
     px(2,4,bodyColor); px(3,4,bodyColor); px(4,4,bodyColor); px(5,4,bodyColor); px(6,4,bodyColor); px(7,4,bodyColor); px(8,4,bodyShad);
-    // row 5
     px(2,5,bodyShad); px(3,5,bodyColor); px(4,5,bodyColor); px(5,5,bodyColor); px(6,5,bodyColor); px(7,5,bodyShad);
-    // row 6
     px(3,6,bodyShad); px(4,6,bodyShad); px(5,6,bodyShad);
-
-    // Top fin
     px(5,1,'#ffaa00'); px(6,1,'#ffcc00'); px(7,1,'#ffaa00');
-
-    // Eye area
-    px(9,3,'#fff'); // white
-    px(9,3.4,'#111',0.6,0.6); // pupil - draw slightly offset
-    c.fillStyle = '#111';
-    c.fillRect(Math.round(9.2*pw), Math.round(3.4*ph), Math.ceil(0.6*pw), Math.ceil(0.6*ph));
     c.fillStyle = '#fff';
     c.fillRect(Math.round(9.0*pw), Math.round(3.0*ph), Math.ceil(0.6*pw), Math.ceil(0.6*ph));
     c.fillStyle = '#222';
     c.fillRect(Math.round(9.2*pw), Math.round(3.2*ph), Math.ceil(0.5*pw), Math.ceil(0.5*ph));
     c.fillStyle = '#fff';
     c.fillRect(Math.round(9.1*pw), Math.round(3.1*ph), Math.ceil(0.2*pw), Math.ceil(0.2*ph));
-
-    // Head / snout
     px(10,3,'#ffaa44'); px(10,4,'#ffaa44'); px(10,5,'#ff8844');
     px(11,4,'#ff9933');
-    // Mouth
     c.fillStyle = '#cc3300';
     c.fillRect(Math.round(11.5*pw), Math.round(4.5*ph), Math.ceil(0.8*pw), Math.ceil(0.3*ph));
-
-    // Scales hint
     c.strokeStyle = 'rgba(180,60,0,0.35)';
     c.lineWidth = Math.max(1, pw*0.5);
     for (let i = 0; i < 3; i++) {
@@ -159,7 +133,6 @@
       c.arc((4+i*1.5)*pw, 4.5*ph, 1.5*pw, Math.PI, 0);
       c.stroke();
     }
-
     c.restore();
   }
 
@@ -172,10 +145,8 @@
       c.fillStyle = color;
       c.fillRect(Math.round(col*pw), Math.round(row*ph), Math.ceil(cols*pw), Math.ceil(rows*ph));
     }
-    // shadow
     c.fillStyle = 'rgba(0,0,0,0.28)';
     c.fillRect(Math.round(1*pw), Math.round(8.5*ph), Math.ceil(8*pw), Math.ceil(1.2*ph));
-    // pixel rock shape
     px(3,1,'#9e9e9e',4,1);
     px(2,2,'#bdbdbd',6,1);
     px(1,3,'#eeeeee',1,1); px(2,3,'#bdbdbd',5,1); px(7,3,'#757575',1,1);
@@ -183,12 +154,9 @@
     px(1,5,'#9e9e9e',1,1); px(2,5,'#bdbdbd',4,1); px(6,5,'#757575',2,1);
     px(2,6,'#757575',5,1);
     px(3,7,'#616161',4,1);
-    // highlight
     px(2,3,'#eeeeee',2,2);
-    // moss
     px(3,3,'#558b2f',2,1);
     px(6,5,'#33691e',2,1);
-    // crack
     c.strokeStyle = '#21212199';
     c.lineWidth = Math.max(1, pw*0.5);
     c.beginPath();
@@ -206,26 +174,21 @@
       c.fillStyle = color;
       c.fillRect(Math.round(col*pw), Math.round(row*ph), Math.ceil(cols*pw), Math.ceil(rows*ph));
     }
-    // shadow
     c.fillStyle = 'rgba(0,0,0,0.22)';
     c.fillRect(Math.round(1*pw), Math.round(8.4*ph), Math.ceil(10*pw), Math.ceil(1.2*ph));
-    // log end cap left
     px(0,3,'#5d3317',2,4);
     px(0,2,'#4e2700',2,1); px(0,7,'#4e2700',2,1);
-    // rings
     c.strokeStyle = '#6d4c41'; c.lineWidth = Math.max(1, pw*0.6);
     for(let r=0.3;r<=0.9;r+=0.3){
       c.beginPath();
       c.ellipse(1.2*pw, 5*ph, 0.9*pw*r, 1.6*ph*r, 0, 0, Math.PI*2);
       c.stroke();
     }
-    // log body
     px(2,2,'#4e2700',8,1);
     px(2,3,'#8d5524',8,1);
     px(2,4,'#a0622a',8,2);
     px(2,6,'#8d5524',8,1);
     px(2,7,'#4e2700',8,1);
-    // bark lines
     c.strokeStyle = 'rgba(62,26,0,0.4)'; c.lineWidth = Math.max(1,pw*0.4);
     for(let i=0;i<4;i++){
       c.beginPath();
@@ -233,7 +196,6 @@
       c.quadraticCurveTo((4+i*2)*pw, 5*ph, (3+i*2)*pw, 8*ph);
       c.stroke();
     }
-    // algae on top
     c.strokeStyle = '#33691eaa'; c.lineWidth = Math.max(1,pw*0.5);
     for(let i=0;i<3;i++){
       c.beginPath();
@@ -248,8 +210,6 @@
   function drawBubbleSprite(c, r) {
     c.save();
     c.imageSmoothingEnabled = false;
-    const sz = r * 2;
-    // outer rim pixel art
     const steps = 12;
     for (let i = 0; i < steps; i++) {
       const a = (i / steps) * Math.PI * 2;
@@ -259,25 +219,21 @@
       c.fillStyle = `rgba(129,212,250,${0.5 + 0.3 * Math.sin(i)})`;
       c.fillRect(Math.round(bx - px/2), Math.round(by - px/2), Math.ceil(px), Math.ceil(px));
     }
-    // inner fill
     const ig = c.createRadialGradient(r*0.65, r*0.5, 1, r, r, r*0.88);
     ig.addColorStop(0, 'rgba(255,255,255,0.5)');
     ig.addColorStop(0.4, 'rgba(178,235,242,0.2)');
     ig.addColorStop(1, 'rgba(21,101,192,0.15)');
     c.beginPath(); c.arc(r, r, r*0.85, 0, Math.PI*2);
     c.fillStyle = ig; c.fill();
-    // highlight pixels
     const hp = Math.max(2, r * 0.2);
     c.fillStyle = 'rgba(255,255,255,0.75)';
     c.fillRect(Math.round(r*0.45), Math.round(r*0.35), Math.ceil(hp*1.8), Math.ceil(hp));
     c.fillStyle = 'rgba(255,255,255,0.55)';
     c.fillRect(Math.round(r*0.42), Math.round(r*0.5), Math.ceil(hp), Math.ceil(hp*0.7));
-    // heart inside (pixel)
     c.save();
     c.translate(r, r + r*0.1);
     const hs = r * 0.35;
     c.fillStyle = '#ff6b6b';
-    // pixel heart 5x4
     const hpx = hs * 0.4;
     const heart = [
       [0,1,0,1,0],
@@ -301,7 +257,7 @@
     c.restore();
   }
 
-  // Heart pixel-art sprite — color changes: red=full, gray=lost, green=gaining
+  // Heart pixel-art sprite
   function drawHeartSprite(c, w, h, full, gaining = false) {
     c.clearRect(0, 0, w, h);
     c.save();
@@ -313,13 +269,12 @@
     }
     let color, hiColor;
     if (gaining) {
-      color = '#00e676'; hiColor = '#69f0ae'; // verde al recoger burbuja
+      color = '#00e676'; hiColor = '#69f0ae';
     } else if (full) {
-      color = '#f44336'; hiColor = '#ff8a80'; // rojo al tener vida
+      color = '#f44336'; hiColor = '#ff8a80';
     } else {
-      color = '#333'; hiColor = '#555'; // gris al perder vida
+      color = '#333'; hiColor = '#555';
     }
-    // pixel heart shape (7x6 grid)
     const heart = [
       [0,1,1,0,1,1,0],
       [1,1,1,1,1,1,1],
@@ -331,7 +286,6 @@
     for (let row = 0; row < heart.length; row++) {
       for (let col = 0; col < heart[row].length; col++) {
         if (heart[row][col]) {
-          // highlight top-left pixels
           const isHi = (row === 0 && (col === 1 || col === 4)) || (row === 1 && (col === 1 || col === 4));
           px(col, row, isHi && full ? hiColor : color);
         }
@@ -348,14 +302,12 @@
     bc.width = bw; bc.height = bh;
     const bx = bc.getContext('2d');
     bx.imageSmoothingEnabled = false;
-    // Deep sea base gradient
     const bg = bx.createLinearGradient(0, 0, 0, bh);
     bg.addColorStop(0,   '#082244');
     bg.addColorStop(0.5, '#0a3060');
     bg.addColorStop(1,   '#061830');
     bx.fillStyle = bg;
     bx.fillRect(0, 0, bw, bh);
-    // Pixel grid overlay — give it a slight tiled depth feel
     for (let y = 0; y < bh; y += 8) {
       for (let x = 0; x < bw; x += 8) {
         if ((x + y) % 16 === 0) {
@@ -364,7 +316,6 @@
         }
       }
     }
-    // Horizontal light caustics (wavy pixel lines)
     for (let y = 4; y < bh; y += 18) {
       bx.strokeStyle = `rgba(66,165,245,${0.07 + Math.random()*0.05})`;
       bx.lineWidth = 2;
@@ -375,15 +326,13 @@
       }
       bx.stroke();
     }
-    // Pixel bubble dots
     const bubColors = ['rgba(178,235,242,0.18)', 'rgba(129,212,250,0.14)', 'rgba(66,165,245,0.22)'];
     for (let i = 0; i < 7; i++) {
       const bxp = Math.floor(Math.random()*bw), byp = Math.floor(Math.random()*bh);
-      const sz = 2 + Math.floor(Math.random()*3) * 2; // 2,4,6 px
+      const sz = 2 + Math.floor(Math.random()*3) * 2;
       bx.fillStyle = bubColors[i % bubColors.length];
       bx.fillRect(bxp, byp, sz, sz);
     }
-    // Small pixel coral/seaweed dots at bottom
     for (let i = 0; i < 3; i++) {
       const sx = Math.floor(Math.random()*bw);
       bx.fillStyle = `rgba(0,150,100,${0.15+Math.random()*0.1})`;
@@ -400,14 +349,12 @@
     ctx.fillStyle = bgPattern;
     ctx.fillRect(0, -96, canvas.width, canvas.height + 192);
     ctx.restore();
-    // Deep gradient overlay for depth
     const dg = ctx.createLinearGradient(0, 0, 0, canvas.height);
     dg.addColorStop(0, 'rgba(5,10,30,0.35)');
     dg.addColorStop(0.5, 'rgba(5,15,40,0.1)');
     dg.addColorStop(1, 'rgba(3,8,20,0.5)');
     ctx.fillStyle = dg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // Vignette
     const vg = ctx.createRadialGradient(
       canvas.width/2, canvas.height/2, canvas.height*0.22,
       canvas.width/2, canvas.height/2, canvas.height*0.72
@@ -416,7 +363,6 @@
     vg.addColorStop(1, 'rgba(3,8,25,0.55)');
     ctx.fillStyle = vg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // Lane dividers
     ctx.strokeStyle = 'rgba(66,165,245,0.07)';
     ctx.lineWidth = 1;
     for (let i = 1; i < LANES; i++) {
@@ -433,7 +379,7 @@
   let fishFrame = 0;
   let fishFrameTimer = 0;
   const FISH_ANIM_SPEED = 180;
-  let fishDir = 1; // 1 = right, -1 = left
+  let fishDir = 1;
 
   function initPlayer() {
     PLAYER.w = PLAYER_W;
@@ -444,11 +390,9 @@
   }
 
   function updatePlayer(delta) {
-    // Mouse follow
     if (mouseX >= 0) {
       PLAYER.targetX = mouseX - PLAYER.w / 2;
     }
-    // Keyboard
     if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
       PLAYER.targetX -= 4 * speedMul * 0.8;
       fishDir = -1;
@@ -457,18 +401,13 @@
       PLAYER.targetX += 4 * speedMul * 0.8;
       fishDir = 1;
     }
-    // Lerp
     PLAYER.x += (PLAYER.targetX - PLAYER.x) * 0.18;
     PLAYER.x = Math.max(0, Math.min(canvas.width - PLAYER.w, PLAYER.x));
-
-    // Animate
     fishFrameTimer += delta;
     if (fishFrameTimer > FISH_ANIM_SPEED) {
       fishFrame = (fishFrame + 1) % 2;
       fishFrameTimer = 0;
     }
-
-    // Vertical bob
     PLAYER.y = canvas.height - PLAYER.h - 28 + Math.sin(Date.now() * 0.003) * 4;
   }
 
@@ -478,7 +417,6 @@
     if (invulnTimer > 0) {
       ctx.globalAlpha = 0.5 + 0.5 * Math.sin(Date.now() * 0.018);
     }
-    // Tail wiggle
     const wiggle = Math.sin(Date.now() * 0.012) * 2.5;
     ctx.drawImage(sp, PLAYER.x, PLAYER.y + wiggle, PLAYER.w, PLAYER.h);
     ctx.restore();
@@ -486,21 +424,17 @@
 
   // ---- OBSTACLES ----
   function spawnObstacle() {
-    // Find occupied lanes
     const activeObstacles = obstacles.filter(o => o.y < canvas.height * 0.4);
     const occupiedLanes = new Set(activeObstacles.map(o => o.lane));
     if (occupiedLanes.size >= 4) return;
-
     const availLanes = [];
     for (let i = 0; i < LANES; i++) {
       if (!occupiedLanes.has(i)) availLanes.push(i);
     }
     if (availLanes.length === 0) return;
-
     const lane = availLanes[Math.floor(Math.random() * availLanes.length)];
     const type = Math.random() < 0.5 ? 'rock' : 'log';
     const x = lane * LANE_W + (LANE_W - OBSTACLE_W) / 2;
-
     obstacles.push({
       x, y: -OBSTACLE_H - 10,
       w: OBSTACLE_W, h: OBSTACLE_H,
@@ -516,7 +450,6 @@
         obstacles.splice(i, 1);
       }
     }
-    // Obstacle spawn
     obstacleTimer += delta;
     if (obstacleTimer >= obstacleInterval) {
       obstacleTimer = 0;
@@ -532,7 +465,6 @@
       } else {
         sp = getSprite('log', (c,w,h) => drawLogSprite(c,w,h), OBSTACLE_W*2, OBSTACLE_H*2);
       }
-      // Water shimmer
       ctx.save();
       ctx.shadowColor = 'rgba(0,100,255,0.18)';
       ctx.shadowBlur = 8;
@@ -545,8 +477,8 @@
   function spawnBubble() {
     const margin = BUBBLE_R + 10;
     const x = margin + Math.random() * (canvas.width - margin * 2);
-    // Spawn near the player zone so it's reachable, then slowly drifts up
-    const y = canvas.height - BUBBLE_R * 4 - Math.random() * canvas.height * 0.15;
+    // Aparece desde arriba del canvas
+    const y = -BUBBLE_R * 2; // arriba del canvas
     const sp = document.createElement('canvas');
     sp.width = BUBBLE_R * 2 + 4;
     sp.height = BUBBLE_R * 2 + 4;
@@ -556,7 +488,7 @@
       r: BUBBLE_R,
       sprite: sp,
       floatOffset: Math.random() * Math.PI * 2,
-      vy: -0.4 - Math.random() * 0.3, // slow upward drift
+      vy: 3.5, // fijo hacia abajo
       born: Date.now()
     });
   }
@@ -564,22 +496,19 @@
   function updateBubbles(delta) {
     for (let i = bubbles.length - 1; i >= 0; i--) {
       const b = bubbles[i];
-      // Move slowly upward
-      b.y += b.vy * (delta / 16);
-      // Remove if gone off top
-      if (b.y < -BUBBLE_R * 4) {
+      // Cae hacia abajo escalado con la velocidad del juego
+      b.y = b.y + b.vy * (delta / 16); // siempre baja
+      if (b.y > canvas.height + BUBBLE_R * 4) {
         bubbles.splice(i, 1);
-        // Reset spawn flag so it doesn't respawn indefinitely — just disappears
       }
     }
   }
 
   function drawBubbles() {
     for (const b of bubbles) {
-      // Gentle horizontal sway
       const sway = Math.sin(Date.now() * 0.0015 + b.floatOffset) * 3;
       ctx.save();
-      ctx.shadowColor = '#42a5f5';
+      ctx.shadowColor = '#4245f5';
       ctx.shadowBlur = 14;
       ctx.drawImage(b.sprite, b.x + sway - b.r - 2, b.y - b.r - 2);
       ctx.restore();
@@ -630,7 +559,6 @@
     const px = PLAYER.x + 6, py = PLAYER.y + 4;
     const pw = PLAYER.w - 12, ph = PLAYER.h - 8;
 
-    // Obstacles
     if (invulnTimer <= 0) {
       for (let i = obstacles.length - 1; i >= 0; i--) {
         const o = obstacles[i];
@@ -638,7 +566,6 @@
           px < o.x + o.w - 4 && px + pw > o.x + 4 &&
           py < o.y + o.h - 4 && py + ph > o.y + 4
         ) {
-          // Hit!
           loseLife(o.x + o.w/2, o.y + o.h/2);
           obstacles.splice(i, 1);
           break;
@@ -646,7 +573,6 @@
       }
     }
 
-    // Bubbles
     for (let i = bubbles.length - 1; i >= 0; i--) {
       const b = bubbles[i];
       const sway = Math.sin(Date.now() * 0.0015 + b.floatOffset) * 3;
@@ -666,7 +592,6 @@
     spawnParticles(PLAYER.x + PLAYER.w/2, PLAYER.y + PLAYER.h/2, '#ff4444', 12);
     updateLivesUI('lose');
 
-    // Spawn bubble on first and second death (once each)
     if (lives === 2 && !bubbleSpawned[0]) {
       bubbleSpawned[0] = true;
       setTimeout(spawnBubble, 800);
@@ -698,7 +623,6 @@
       const gaining = event === 'gain' && i === lives - 1;
       drawHeartSprite(c.getContext('2d'), 22, 22, i < lives, gaining);
     });
-    // Brief green flash on gain
     if (event === 'gain') {
       setTimeout(() => {
         lifeCvs.forEach((c, i) => drawHeartSprite(c.getContext('2d'), 22, 22, i < lives, false));
@@ -719,7 +643,6 @@
     speedTimer += delta;
     if (speedTimer >= SPEED_INCREASE_INTERVAL) {
       speedTimer = 0;
-      // Random slowdown chance
       if (Math.random() < RANDOM_SLOWDOWN_CHANCE && speedMul > 1.2) {
         speedMul = Math.max(1.0, speedMul - 0.3);
       } else {
@@ -736,13 +659,9 @@
     if (dt > 100) dt = 100;
     lastTimestamp = ts;
 
-    // Score
     score += dt * speedMul * 0.008;
-
-    // BG
     bgOffset += 1.8 * speedMul * (dt / 16);
 
-    // Invuln
     if (invulnTimer > 0) invulnTimer -= dt;
 
     updateDifficulty(dt);
@@ -752,7 +671,6 @@
     updateParticles(dt);
     checkCollisions();
 
-    // Draw
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
     drawObstacles();
@@ -766,7 +684,6 @@
 
   // ---- GAME FLOW ----
   function startGame() {
-    // Reset
     score = 0;
     lives = 3;
     speedMul = 1.0;
@@ -786,7 +703,6 @@
     updateLivesUI();
     updateScoreUI();
 
-    // Show countdown
     btnStart.style.display = 'none';
     gameOverScore.style.display = 'none';
     startFishAnim.style.display = 'none';
@@ -850,7 +766,6 @@
     btnStart.textContent = 'INICIAR JUEGO';
     btnStart.style.display = 'block';
 
-    // Draw initial background
     resize();
     buildBgPattern();
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -871,7 +786,6 @@
     }
   });
 
-  // Bubble click
   canvas.addEventListener('click', e => {
     if (gameState !== 'playing') return;
     const rect = canvas.getBoundingClientRect();
