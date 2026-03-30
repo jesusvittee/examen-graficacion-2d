@@ -96,45 +96,69 @@
   }
 
   // Goldfish pixel-art sprite
-  function drawGoldfishSprite(c, w, h, flip = false) {
-    c.save();
-    if (flip) { c.scale(-1,1); c.translate(-w,0); }
-    c.imageSmoothingEnabled = false;
-    const pw = w / 16, ph = h / 10;
-    function px(col, row, color, cols=1, rows=1) {
-      c.fillStyle = color;
-      c.fillRect(Math.round(col*pw), Math.round(row*ph), Math.ceil(cols*pw), Math.ceil(rows*ph));
-    }
-    px(0,2,'#ff4400'); px(0,3,'#ff6600'); px(0,4,'#ff4400');
-    px(1,1,'#ff5500'); px(1,2,'#ff8800'); px(1,3,'#ffaa00'); px(1,4,'#ff8800'); px(1,5,'#ff5500');
-    const bodyColor = '#ff8c00';
-    const bodyHi = '#ffcc44';
-    const bodyShad = '#cc4400';
-    px(2,2,bodyHi); px(3,2,bodyHi); px(4,2,bodyHi); px(5,2,bodyColor); px(6,2,bodyColor);
-    px(2,3,bodyHi); px(3,3,bodyHi); px(4,3,bodyColor); px(5,3,bodyColor); px(6,3,bodyColor); px(7,3,bodyColor);
-    px(2,4,bodyColor); px(3,4,bodyColor); px(4,4,bodyColor); px(5,4,bodyColor); px(6,4,bodyColor); px(7,4,bodyColor); px(8,4,bodyShad);
-    px(2,5,bodyShad); px(3,5,bodyColor); px(4,5,bodyColor); px(5,5,bodyColor); px(6,5,bodyColor); px(7,5,bodyShad);
-    px(3,6,bodyShad); px(4,6,bodyShad); px(5,6,bodyShad);
-    px(5,1,'#ffaa00'); px(6,1,'#ffcc00'); px(7,1,'#ffaa00');
-    c.fillStyle = '#fff';
-    c.fillRect(Math.round(9.0*pw), Math.round(3.0*ph), Math.ceil(0.6*pw), Math.ceil(0.6*ph));
-    c.fillStyle = '#222';
-    c.fillRect(Math.round(9.2*pw), Math.round(3.2*ph), Math.ceil(0.5*pw), Math.ceil(0.5*ph));
-    c.fillStyle = '#fff';
-    c.fillRect(Math.round(9.1*pw), Math.round(3.1*ph), Math.ceil(0.2*pw), Math.ceil(0.2*ph));
-    px(10,3,'#ffaa44'); px(10,4,'#ffaa44'); px(10,5,'#ff8844');
-    px(11,4,'#ff9933');
-    c.fillStyle = '#cc3300';
-    c.fillRect(Math.round(11.5*pw), Math.round(4.5*ph), Math.ceil(0.8*pw), Math.ceil(0.3*ph));
-    c.strokeStyle = 'rgba(180,60,0,0.35)';
-    c.lineWidth = Math.max(1, pw*0.5);
-    for (let i = 0; i < 3; i++) {
-      c.beginPath();
-      c.arc((4+i*1.5)*pw, 4.5*ph, 1.5*pw, Math.PI, 0);
-      c.stroke();
-    }
-    c.restore();
+ function drawGoldfishSprite(c, w, h, flip = false) {
+  c.save();
+
+  // Ajuste para orientación vertical (Mantenido igual)
+  c.translate(w / 2, h / 2);
+  c.rotate(-Math.PI / 2);
+  c.translate(-h / 2, -w / 2);
+
+  if (flip) {
+    c.scale(-1, 1);
+    c.translate(-h, 0);
   }
+
+  c.imageSmoothingEnabled = false;
+
+  // Proporciones corregidas para que no se estire
+  const pw = h / 16;
+  const ph = w / 20;
+
+  function px(col, row, color, cols = 1, rows = 1) {
+    c.fillStyle = color;
+    c.fillRect(
+      Math.round(col * pw),
+      Math.round(row * ph),
+      Math.ceil(cols * pw),
+      Math.ceil(rows * ph)
+    );
+  }
+
+  // Colores extraídos de la imagen original
+  const shellBlue = '#1c71d8';
+  const shellDark = '#0a4da4';
+  const shellLight = '#3cc7f3';
+  const skinBrown = '#9a6b33';
+  const skinGold = '#c4a055';
+
+  // --- Aletas Traseras (lado izquierdo del dibujo horizontal) ---
+  px(0, 2, skinBrown, 2, 2); px(0, 2, skinGold); // Superior
+  px(0, 8, skinBrown, 2, 2); px(0, 9, skinGold); // Inferior
+
+  // --- Aletas Delanteras (grandes, arriba y abajo del caparazón) ---
+  px(4, 0, skinBrown, 4, 2); px(5, 0, skinGold, 2, 1); // Aleta superior
+  px(4, 10, skinBrown, 4, 2); px(5, 11, skinGold, 2, 1); // Aleta inferior
+
+  // --- Caparazón (Cuerpo central) ---
+  px(2, 2, shellDark, 10, 8); // Borde azul oscuro
+  px(3, 3, shellBlue, 8, 6);  // Interior azul
+  
+  // Patrón de brillo (Mosaico)
+  px(4, 4, shellLight, 2, 1); px(8, 4, shellLight, 2, 1);
+  px(6, 5, shellLight, 2, 2); // Centro brillante
+  px(4, 7, shellLight, 2, 1); px(8, 7, shellLight, 2, 1);
+
+  // --- Cabeza (lado derecho para que al rotar quede ARRIBA) ---
+  px(12, 4, skinBrown, 3, 4); 
+  px(13, 5, skinGold, 2, 2); // Mancha dorada en cabeza
+  px(14, 5, '#000', 0.6, 0.6); // Ojo
+
+  // --- Pequeña Cola (detrás) ---
+  px(1, 5.5, skinBrown, 1, 1);
+
+  c.restore();
+}
 
   // Rock pixel-art sprite
   function drawRockSprite(c, w, h) {
