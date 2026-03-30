@@ -17,11 +17,19 @@
   const scoreDisplay = document.getElementById('score-display');
   const hiscoreDisplay = document.getElementById('hiscore-display');
   const speedDisplay = document.getElementById('speed-display');
+  const algaeDisplay = document.getElementById('algae-display');
+  const hiAlgaeDisplay = document.getElementById('hialgae-display');
+
   const lifeCvs = [
     document.getElementById('life1'),
     document.getElementById('life2'),
     document.getElementById('life3'),
   ];
+
+  let algaeCount = 0;
+  let hiAlgae = parseInt(localStorage.getItem('goldfish_algae_hi') || '0');
+  let algaes = []; // Array para las algas activas en pantalla
+
 // Esconder el mouse al entrar al canvas
 canvas.addEventListener('mouseenter', () => {
   canvas.style.cursor = 'none';
@@ -410,6 +418,68 @@ function drawBarrelSprite(c, w, h) {
     c.restore();
   }
 
+function drawSeaweedSprite(c, w, h) {
+  c.save();
+  c.imageSmoothingEnabled = false;
+  
+  // Usamos una cuadrícula de 10x10 para que coincida con la escala de tus rocas
+  const pw = w / 10, ph = h / 10;
+
+  function px(col, row, color, cols = 1, rows = 1) {
+    c.fillStyle = color;
+    c.fillRect(
+      Math.round(col * pw),
+      Math.round(row * ph),
+      Math.ceil(cols * pw),
+      Math.ceil(rows * ph)
+    );
+  }
+
+  // --- PALETA DE COLORES (Verdes Píxel Art) ---
+  const weedDark = '#33691e';  // Verde oscuro (base y sombras)
+  const weedMid = '#558b2f';   // Verde medio (cuerpo principal)
+  const weedLight = '#8bc34a';  // Verde claro (luz/puntas)
+  const genShadow = 'rgba(0,0,0,0.15)'; // Sombra base sutil
+
+  // 1. SOMBRA BASE (en el suelo, bajo las algas)
+  c.fillStyle = genShadow;
+  c.fillRect(Math.round(1*pw), Math.round(8.5*ph), Math.ceil(8*pw), Math.ceil(1*ph));
+
+  // --- DIBUJO DE LAS 3 ALGAS (De izquierda a derecha) ---
+
+  // A. ALGA IZQUIERDA (Pequeña y ancha)
+  // Tallo
+  px(2, 6, weedDark, 1, 3);
+  // Hojas
+  px(1.5, 7, weedMid); px(2.5, 6.5, weedMid);
+  px(2, 5.5, weedLight); // Punta
+
+  // B. ALGA CENTRAL (La más alta y recta)
+  // Tallo principal
+  px(5, 3, weedDark, 1, 6);
+  // Hojas laterales
+  px(4.5, 7, weedMid); px(5.5, 6, weedMid);
+  px(4.5, 5, weedMid); px(5.5, 4, weedMid);
+  px(4.8, 3.5, weedLight); // Punta
+
+  // C. ALGA DERECHA (Mediana y rizada)
+  // Tallo base
+  px(8, 5, weedDark, 1, 4);
+  // Rizos
+  px(7.5, 7.5, weedMid); px(8.5, 6.5, weedMid);
+  px(7.5, 5.5, weedMid); px(8.5, 4.5, weedMid);
+  px(8, 3.5, weedLight); // Punta
+
+  // --- DETALLES DE TEXTURA (Puntos aleatorios sutiles) ---
+  if (Math.random() > 0.5) {
+    px(5.2, 4.2, weedLight, 0.5, 0.5); // Brillo central
+    px(2.1, 7.1, weedDark, 0.5, 0.5);  // Sombra pequeña
+    px(8.1, 5.1, weedDark, 0.5, 0.5);  // Sombra pequeña
+  }
+
+  c.restore();
+}
+
   // ---- BACKGROUND ----
   let bgPattern = null;
   function buildBgPattern() {
@@ -621,7 +691,32 @@ function drawBarrelSprite(c, w, h) {
       ctx.restore();
     }
   }
+  // algas
+function spawnAlgae() {
+    const lane = Math.floor(Math.random() * LANES);
+    const x = lane * LANE_W + (LANE_W - OBSTACLE_W) / 2;
+    algaes.push({
+      x, y: -OBSTACLE_H - 10,
+      w: OBSTACLE_W, h: OBSTACLE_H,
+      speed: BASE_SPEED * speedMul * 0.9 // Un poco más lentas que los obstáculos
+    });
+  }
 
+  function updateAlgaes(delta) {
+    for (let i = algaes.length - 1; i >= 0; i--) {
+      algaes[i].y += algaes[i].speed * (delta / 16);
+      if (algaes[i].y > canvas.height + 60) algaes.splice(i, 1);
+    }
+    // Aparecen cada cierto tiempo (puedes ajustar el azar)
+    if (Math.random() < 0.01) spawnAlgae(); 
+  }
+
+  function drawAlgaes() {
+    const sp = getSprite('seaweed', (c, w, h) => drawSeaweedSprite(c, w, h), OBSTACLE_W*2, OBSTACLE_H*2);
+    for (const a of algaes) {
+      ctx.drawImage(sp, a.x, a.y, a.w, a.h);
+    }
+  }
   // ---- PARTICLES ----
   function spawnParticles(x, y, color, n = 8) {
     for (let i = 0; i < n; i++) {
@@ -690,6 +785,8 @@ function drawBarrelSprite(c, w, h) {
         collectBubble(i);
         break;
       }
+    
+    
     }
   }
 
@@ -793,7 +890,7 @@ function drawBarrelSprite(c, w, h) {
   function startGame() {
     score = 0;
     lives = 3;
-    speedMul = 1.0;
+    speedMul = 2.0;
     obstacles = [];
     bubbles = [];
     particles = [];
