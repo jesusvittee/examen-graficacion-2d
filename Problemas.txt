@@ -1,12 +1,13 @@
-cuando presione INSTRUCCIONES pausar el juego, pausara la distancia
-Al dañarme aparece la vida, pero no puede ser tomada por que esta continua subiendo y nunca lo alcanzo
-Aparece el puntero y el pez que en total dos peces
+css y html estan bien
+solo que cuando presione INSTRUCCIONES pausar el juego, pausara la distancia que muestra
+Al dañarme aparece la vida, pero la burbuja que aparece no puede ser tomada por que esta continua subiendo y nunca lo alcanzo
+Aparece el puntero y el pez que en total dos peces retirar el del puntero
 
-Apartado de pixeles
+Apartado de constructores siendo canvas de manera pixeladas quiero que se muestren pe
 -- constructor de rocas
 -- constructor de golfish
 -- corazon cambia de color cuando se baja una vida y sube cuando tocan la burbuja
--- burbuja pixele
+-- burbuja pixel debe tambien de bajar y no permanecer subido si no nunca subira la vida
 
 game canvas y overlay tiene que tener las mismas medidas y nada dentro debe salir de esos limites marcados
 
