@@ -404,83 +404,74 @@ function drawBarrelSprite(c, w, h) {
   // ---- BACKGROUND ----
   let bgPattern = null;
   function buildBgPattern() {
-    const bc = document.createElement('canvas');
-    const bw = 96, bh = 96;
-    bc.width = bw; bc.height = bh;
-    const bx = bc.getContext('2d');
-    bx.imageSmoothingEnabled = false;
-    const bg = bx.createLinearGradient(0, 0, 0, bh);
-    bg.addColorStop(0,   '#082244');
-    bg.addColorStop(0.5, '#0a3060');
-    bg.addColorStop(1,   '#061830');
-    bx.fillStyle = bg;
-    bx.fillRect(0, 0, bw, bh);
-    for (let y = 0; y < bh; y += 8) {
-      for (let x = 0; x < bw; x += 8) {
-        if ((x + y) % 16 === 0) {
-          bx.fillStyle = 'rgba(21,101,192,0.06)';
-          bx.fillRect(x, y, 8, 8);
-        }
-      }
+  const bc = document.createElement('canvas');
+  const bw = 128, bh = 128; // Tamaño un poco más grande para mejor variedad
+  bc.width = bw; bc.height = bh;
+  const bx = bc.getContext('2d');
+  bx.imageSmoothingEnabled = false;
+
+  // Fondo transparente o color base sólido (sin degradado)
+  bx.fillStyle = '#4FC3F7'; 
+  bx.fillRect(0, 0, bw, bh);
+
+  // Red de agua (Cáusticas) que conectan en los bordes
+  bx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+  bx.lineWidth = 2;
+  
+  // Dibujamos líneas que se envuelven (wrapping) para que no se note el corte
+  for (let i = 0; i < 3; i++) {
+    bx.beginPath();
+    for (let x = 0; x <= bw; x += 5) {
+      // Usamos una función seno que sea múltiplo del ancho para que el inicio y fin coincidan
+      const py = (i * 40) + Math.sin(x * (Math.PI * 2 / bw)) * 5;
+      x === 0 ? bx.moveTo(x, py) : bx.lineTo(x, py);
     }
-    for (let y = 4; y < bh; y += 18) {
-      bx.strokeStyle = `rgba(66,165,245,${0.07 + Math.random()*0.05})`;
-      bx.lineWidth = 2;
-      bx.beginPath();
-      for (let x = 0; x <= bw; x += 3) {
-        const py = y + Math.sin(x * 0.25 + y) * 2.5;
-        x === 0 ? bx.moveTo(x, py) : bx.lineTo(x, py);
-      }
-      bx.stroke();
-    }
-    const bubColors = ['rgba(178,235,242,0.18)', 'rgba(129,212,250,0.14)', 'rgba(66,165,245,0.22)'];
-    for (let i = 0; i < 7; i++) {
-      const bxp = Math.floor(Math.random()*bw), byp = Math.floor(Math.random()*bh);
-      const sz = 2 + Math.floor(Math.random()*3) * 2;
-      bx.fillStyle = bubColors[i % bubColors.length];
-      bx.fillRect(bxp, byp, sz, sz);
-    }
-    for (let i = 0; i < 3; i++) {
-      const sx = Math.floor(Math.random()*bw);
-      bx.fillStyle = `rgba(0,150,100,${0.15+Math.random()*0.1})`;
-      bx.fillRect(sx, bh-6, 2, 6);
-      bx.fillRect(sx+2, bh-4, 2, 4);
-    }
-    bgPattern = ctx.createPattern(bc, 'repeat');
+    bx.stroke();
   }
 
-  function drawBackground() {
-    if (!bgPattern) buildBgPattern();
-    ctx.save();
-    ctx.translate(0, bgOffset % 96);
-    ctx.fillStyle = bgPattern;
-    ctx.fillRect(0, -96, canvas.width, canvas.height + 192);
-    ctx.restore();
-    const dg = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    dg.addColorStop(0, 'rgba(5,10,30,0.35)');
-    dg.addColorStop(0.5, 'rgba(5,15,40,0.1)');
-    dg.addColorStop(1, 'rgba(3,8,20,0.5)');
-    ctx.fillStyle = dg;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    const vg = ctx.createRadialGradient(
-      canvas.width/2, canvas.height/2, canvas.height*0.22,
-      canvas.width/2, canvas.height/2, canvas.height*0.72
-    );
-    vg.addColorStop(0, 'transparent');
-    vg.addColorStop(1, 'rgba(3,8,25,0.55)');
-    ctx.fillStyle = vg;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = 'rgba(80, 154, 215, 0.07)';
-    ctx.lineWidth = 1;
-    for (let i = 1; i < LANES; i++) {
-      ctx.setLineDash([6, 10]);
-      ctx.beginPath();
-      ctx.moveTo(i * LANE_W, 0);
-      ctx.lineTo(i * LANE_W, canvas.height);
-      ctx.stroke();
-    }
-    ctx.setLineDash([]);
+  // Burbujas aleatorias sutiles
+  bx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+  for (let i = 0; i < 8; i++) {
+    bx.fillRect(Math.random()*bw, Math.random()*bh, 2, 2);
   }
+
+  bgPattern = ctx.createPattern(bc, 'repeat');
+}
+
+  function drawBackground() {
+  if (!bgPattern) buildBgPattern();
+  
+  // 1. Color base azul cielo en TODO el canvas primero
+  ctx.fillStyle = '#81D4FA';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 2. Dibujamos el patrón con textura encima
+  ctx.save();
+  // El offset hace que el agua "fluya" hacia abajo
+  ctx.translate(0, bgOffset % 128);
+  ctx.fillStyle = bgPattern;
+  // Dibujamos un área más grande para cubrir el movimiento
+  ctx.fillRect(0, -128, canvas.width, canvas.height + 256);
+  ctx.restore();
+
+  // 3. Un degradado SUAVE encima de todo para dar profundidad sin cuadros
+  const globalGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  globalGrad.addColorStop(0, 'rgba(255, 255, 255, 0.1)'); // Brillo arriba
+  globalGrad.addColorStop(1, 'rgba(0, 0, 0, 0.05)');    // Sombra mínima abajo
+  ctx.fillStyle = globalGrad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 4. Líneas de carriles (opcional, muy sutiles)
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+  ctx.setLineDash([5, 15]);
+  for (let i = 1; i < LANES; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i * LANE_W, 0);
+    ctx.lineTo(i * LANE_W, canvas.height);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
 
   // ---- PLAYER ----
   let fishFrame = 0;
