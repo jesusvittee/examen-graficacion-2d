@@ -744,13 +744,13 @@
 
     overlay.classList.remove('hidden');
     overlayTitle.style.display = 'block';
-    overlayTitle.textContent = '💀 GAME OVER';
+    overlayTitle.textContent = 'GAME OVER';
     overlaySub.style.display = 'none';
     startFishAnim.style.display = 'none';
     countdownEl.style.display = 'none';
     gameOverScore.style.display = 'block';
     gameOverScore.innerHTML = `Distancia recorrida: <span style="color:var(--gold)">${km} km</span><br>` +
-      (isNew ? `<span style="color:#69f0ae">🏆 ¡NUEVO RÉCORD!</span>` : `Récord: <span style="color:#69f0ae">${(hiRaw/100).toFixed(2)} km</span>`);
+      (isNew ? `<span style="color:#69f0ae">¡NUEVO RÉCORD!</span>` : `Récord: <span style="color:#69f0ae">${(hiRaw/100).toFixed(2)} km</span>`);
     btnStart.textContent = 'JUGAR DE NUEVO';
     btnStart.style.display = 'block';
   }
@@ -802,10 +802,24 @@
   });
 
   btnStart.addEventListener('click', startGame);
+document.addEventListener('keydown', function(event) {
+  if (event.code === 'Space') {
+    event.preventDefault(); // evita scroll de la página
+
+    const modal = bootstrap.Modal.getOrCreateInstance(modalInstr);
+
+    if (modalInstr.classList.contains('show')) {
+      modal.hide(); // cerrará y ejecutará hidden.bs.modal
+    } else {
+      modal.show(); // abrirá y ejecutará show.bs.modal
+    }
+  }
+});
 
   // ---- PAUSE ON INSTRUCCIONES MODAL ----
   const modalInstr = document.getElementById('modalInstrucciones');
   let pausedByModal = false;
+
   modalInstr.addEventListener('show.bs.modal', () => {
     if (gameState === 'playing') {
       gameState = 'paused';

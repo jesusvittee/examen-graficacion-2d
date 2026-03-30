@@ -1,16 +1,42 @@
-css y html estan bien
-solo que cuando presione INSTRUCCIONES pausar el juego, pausara la distancia que muestra
-Al dañarme aparece la vida, pero la burbuja que aparece no puede ser tomada por que esta continua subiendo y nunca lo alcanzo
-Aparece el puntero y el pez que en total dos peces retirar el del puntero
+En la versión actual:
 
-Apartado de constructores siendo canvas de manera pixeladas quiero que se muestren pe
--- constructor de rocas
--- constructor de golfish
--- corazon cambia de color cuando se baja una vida y sube cuando tocan la burbuja
--- burbuja pixel debe tambien de bajar y no permanecer subido si no nunca subira la vida
+El pez se mueve lateralmente
+Los obstáculos caen y deben esquivarse
+Hay sistema de vidas
+La dificultad aumenta con el tiempo
 
-game canvas y overlay tiene que tener las mismas medidas y nada dentro debe salir de esos limites marcados
+Ahora quiero diseñar una versión 2 más sólida y entretenida, inspirada en la dinámica de Banana Kong, pero adaptada completamente a temática acuática.
 
-cambiar la imagen del pez a un pez goldfish
+Quiero que rediseñes el gameplay manteniendo la base técnica, pero cambiando la experiencia para que sea más adictiva.
 
-cambiar fondo de pantalla
+Requisitos para la versión 2:
+
+El pez debe avanzar automáticamente (sensación de progreso constante)
+El jugador solo controla izquierda/derecha
+Debe haber una sola vida (más tensión)
+El juego inicia lento unos segundos y luego se acelera
+
+Sistema principal nuevo:
+
+Debe existir un sistema de recolección (peces pequeños o burbujas)
+Estos llenan una barra de poder
+Al llenarse, se activa un modo temporal donde el pez puede destruir obstáculos
+Deben existir obstáculos especiales diseñados para obligar el uso de este poder
+
+Flujo del juego (muy importante):
+
+Inicio tranquilo
+Aumento de velocidad
+Recolección de energía
+Aparición de obstáculos difíciles
+Activación del poder
+Destrucción de obstáculos
+Repetición del ciclo con mayor dificultad
+
+También quiero que incluyas:
+
+Un enemigo perseguidor (pez más grande) que aparezca después de un tiempo y genere presión constante
+Tipos de obstáculos normales y especiales
+Cómo debe sentirse el ritmo del juego
+Cómo evitar que el juego se vuelva repetitivo
+Cómo mejorar la experiencia respecto a mi versión 1
