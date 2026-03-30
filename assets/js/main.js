@@ -22,6 +22,15 @@
     document.getElementById('life2'),
     document.getElementById('life3'),
   ];
+// Esconder el mouse al entrar al canvas
+canvas.addEventListener('mouseenter', () => {
+  canvas.style.cursor = 'none';
+});
+
+// (Opcional) Si quieres que vuelva a aparecer al salir del juego
+canvas.addEventListener('mouseleave', () => {
+  canvas.style.cursor = 'default';
+});
 
   // ---- SIZES ----
   function resize() {
