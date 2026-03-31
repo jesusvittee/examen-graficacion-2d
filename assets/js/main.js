@@ -683,7 +683,7 @@
 
   function showStart(){
     overlay.classList.remove('hidden');
-    overlayTitle.style.display='block'; overlayTitle.textContent='GOLDFISH';
+    overlayTitle.style.display='block'; overlayTitle.textContent='AYOTL';
     overlaySub.style.display='block'; startFishAnim.style.display='block';
     countdownEl.style.display='none'; gameOverScore.style.display='none';
     btnStart.textContent='INICIAR JUEGO'; btnStart.style.display='block';
