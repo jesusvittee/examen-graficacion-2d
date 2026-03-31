@@ -32,9 +32,20 @@ Controla a Goldfish mientras cae en las profundidades del océano. Esquiva rocas
 ```
 /
 ├── index.html
+├── README.md
 └── assets/
     ├── css/
     │   └── style.css
+    ├── img/
+    │   ├── barril.png
+    │   ├── favicon.png
+    │   ├── gold-fish.png
+    │   ├── gold-fish-2.png
+    │   ├── heart-read.png
+    │   ├── heart-white.png
+    │   ├── image.png
+    │   ├── rock.png
+    │   └── rocka.png
     └── js/
         └── main.js
 ```
