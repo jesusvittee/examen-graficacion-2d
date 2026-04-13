@@ -1,4 +1,4 @@
-# 🐠 Goldfish — The Deep Run
+# Turtle — The Deep Run
 
 Videojuego 2D de supervivencia acuática hecho con HTML5 Canvas puro, sin frameworks ni dependencias de juego.
 
@@ -9,7 +9,7 @@ Videojuego 2D de supervivencia acuática hecho con HTML5 Canvas puro, sin framew
 
 ## 🎮 ¿De qué trata?
 
-Controla a Goldfish mientras cae en las profundidades del océano. Esquiva rocas y troncos, recoge algas y atrapa burbujas para sobrevivir el mayor tiempo posible.
+Controla a Turtle mientras cae en las profundidades del océano. Esquiva rocas y troncos, recoge algas y atrapa burbujas para sobrevivir el mayor tiempo posible.
 
 ## 🕹️ Controles
 
