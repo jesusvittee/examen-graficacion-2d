@@ -29,7 +29,13 @@
 
   /* ---- LAYOUT ---- */
   body { display: flex; flex-direction: column; }
-
+body {
+  background-image: url("../img/fondo.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
   header {
     height: var(--header-h);
     min-height: var(--header-h);
